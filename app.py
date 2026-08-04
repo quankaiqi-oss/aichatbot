@@ -27,57 +27,78 @@ page = st.sidebar.radio(
 )
 
 if page == "Chatbot":
-    st.header("Chatbot")
-    model_type = st.radio("Choose model", ["svm", "logistic"], horizontal=True)
-    user_message = st.text_area(
-        "Customer message",
-        placeholder="Example: I want to track my order",
-        height=100,
-    )
+    st.header("Real-Time Chatbot")
+    model_type = st.sidebar.radio("Chatbot model", ["svm", "logistic"])
 
-    if st.button("Predict Intent", type="primary"):
-        if not user_message.strip():
-            st.warning("Please enter a customer message first.")
-        else:
-            try:
-                result = predict_intent(user_message, model_type=model_type)
-                st.session_state["last_prediction"] = {
-                    "message": user_message,
-                    "model": model_type,
-                    **result,
-                }
-            except FileNotFoundError:
-                st.error("Model files are missing. Please run preprocessing and training first.")
+    if "chat_history" not in st.session_state:
+        st.session_state["chat_history"] = [
+            {
+                "role": "assistant",
+                "content": (
+                    "Hi, I am ShopCare MY. Ask me about order tracking, refunds, "
+                    "delivery, payment, account issues, or customer support."
+                ),
+            }
+        ]
+
+    for message in st.session_state["chat_history"]:
+        with st.chat_message(message["role"]):
+            st.write(message["content"])
+            if message["role"] == "assistant" and "intent" in message:
+                details = f"Intent: {message['intent']} | Model: {message['model'].upper()}"
+                if message.get("confidence") is not None:
+                    details += f" | Decision score: {message['confidence']:.3f}"
+                st.caption(details)
+
+    user_message = st.chat_input("Type your customer support question...")
+
+    if user_message:
+        st.session_state["chat_history"].append(
+            {"role": "user", "content": user_message}
+        )
+
+        try:
+            result = predict_intent(user_message, model_type=model_type)
+            assistant_message = {
+                "role": "assistant",
+                "content": result["response"],
+                "model": model_type,
+                "intent": result["intent"],
+                "confidence": result["confidence"],
+                "user_message": user_message,
+            }
+            st.session_state["chat_history"].append(assistant_message)
+            st.session_state["last_prediction"] = assistant_message
+            st.rerun()
+        except FileNotFoundError:
+            st.error("Model files are missing. Please run preprocessing and training first.")
+
+    col1, col2 = st.columns([1, 4])
+    if col1.button("Clear Chat"):
+        st.session_state.pop("chat_history", None)
+        st.session_state.pop("last_prediction", None)
+        st.rerun()
 
     if "last_prediction" in st.session_state:
-        result = st.session_state["last_prediction"]
-        st.subheader("Prediction")
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Model", result["model"].upper())
-        col2.metric("Predicted intent", result["intent"])
-        if result["confidence"] is not None:
-            col3.metric("Decision score", f"{result['confidence']:.3f}")
-
-        st.subheader("Chatbot Response")
-        st.write(result["response"])
-
-        with st.form("feedback_form"):
-            rating = st.slider("Was this response useful?", 1, 5, 4)
-            comment = st.text_input("Comment")
-            submitted = st.form_submit_button("Save Feedback")
-            if submitted:
-                with open(FEEDBACK_PATH, "a", newline="", encoding="utf-8") as file:
-                    writer = csv.writer(file)
-                    writer.writerow(
-                        [
-                            datetime.now().isoformat(timespec="seconds"),
-                            result["message"],
-                            result["intent"],
-                            rating,
-                            comment,
-                        ]
-                    )
-                st.success("Feedback saved.")
+        with st.expander("Save feedback for latest response"):
+            result = st.session_state["last_prediction"]
+            with st.form("feedback_form"):
+                rating = st.slider("Was this response useful?", 1, 5, 4)
+                comment = st.text_input("Comment")
+                submitted = st.form_submit_button("Save Feedback")
+                if submitted:
+                    with open(FEEDBACK_PATH, "a", newline="", encoding="utf-8") as file:
+                        writer = csv.writer(file)
+                        writer.writerow(
+                            [
+                                datetime.now().isoformat(timespec="seconds"),
+                                result["user_message"],
+                                result["intent"],
+                                rating,
+                                comment,
+                            ]
+                        )
+                    st.success("Feedback saved.")
 
 elif page == "Model Evaluation":
     st.header("Model Evaluation")
