@@ -4,7 +4,7 @@ import re
 import pandas as pd
 
 
-BASE_DIR = Path(__file__).resolve().parents[1]
+BASE_DIR = Path(__file__).resolve().parents[2]
 DATA_DIR = BASE_DIR / "data"
 RAW_DATASET_PATH = DATA_DIR / "Bitext_Sample_Customer_Support_Training_Dataset_27K_responses-v11.csv"
 CLEAN_DATASET_PATH = DATA_DIR / "chatbot_dataset_clean.csv"

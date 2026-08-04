@@ -6,12 +6,16 @@ import json
 import pandas as pd
 import streamlit as st
 
-from src.chatbot import predict_intent
+from shared.src.chatbot import predict_intent
 
 
 BASE_DIR = Path(__file__).resolve().parent
-RESULTS_DIR = BASE_DIR / "results"
 FEEDBACK_PATH = BASE_DIR / "feedback.csv"
+
+MODEL_RESULT_DIRS = {
+    "svm": BASE_DIR / "kaiqi_svm" / "results",
+    "logistic": BASE_DIR / "kathy_logistic" / "results",
+}
 
 st.set_page_config(
     page_title="ShopCare MY",
@@ -46,6 +50,8 @@ if page == "Chatbot":
             st.write(message["content"])
             if message["role"] == "assistant" and "intent" in message:
                 details = f"Intent: {message['intent']} | Model: {message['model'].upper()}"
+                if message.get("model_intent") and message["model_intent"] != message["intent"]:
+                    details += f" | Raw model: {message['model_intent']}"
                 if message.get("confidence") is not None:
                     details += f" | Decision score: {message['confidence']:.3f}"
                 st.caption(details)
@@ -64,6 +70,7 @@ if page == "Chatbot":
                 "content": result["response"],
                 "model": model_type,
                 "intent": result["intent"],
+                "model_intent": result.get("model_intent"),
                 "confidence": result["confidence"],
                 "user_message": user_message,
             }
@@ -103,9 +110,10 @@ if page == "Chatbot":
 elif page == "Model Evaluation":
     st.header("Model Evaluation")
     selected_model = st.selectbox("Select model", ["svm", "logistic"])
-    metrics_path = RESULTS_DIR / f"{selected_model}_metrics.json"
-    matrix_path = RESULTS_DIR / f"{selected_model}_confusion_matrix.png"
-    report_path = RESULTS_DIR / f"{selected_model}_classification_report.csv"
+    results_dir = MODEL_RESULT_DIRS[selected_model]
+    metrics_path = results_dir / f"{selected_model}_metrics.json"
+    matrix_path = results_dir / f"{selected_model}_confusion_matrix.png"
+    report_path = results_dir / f"{selected_model}_classification_report.csv"
 
     if metrics_path.exists():
         metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
@@ -129,7 +137,7 @@ elif page == "Model Comparison":
     st.header("Model Comparison")
     rows = []
     for model_name in ["svm", "logistic"]:
-        metrics_path = RESULTS_DIR / f"{model_name}_metrics.json"
+        metrics_path = MODEL_RESULT_DIRS[model_name] / f"{model_name}_metrics.json"
         if metrics_path.exists():
             metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
             rows.append(

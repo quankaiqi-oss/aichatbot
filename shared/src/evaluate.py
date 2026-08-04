@@ -14,12 +14,11 @@ from sklearn.metrics import (
 )
 
 
-BASE_DIR = Path(__file__).resolve().parents[1]
-RESULTS_DIR = BASE_DIR / "results"
+BASE_DIR = Path(__file__).resolve().parents[2]
 
 
-def evaluate_and_save(model_name: str, y_true, y_pred, labels) -> dict:
-    RESULTS_DIR.mkdir(exist_ok=True)
+def evaluate_and_save(model_name: str, y_true, y_pred, labels, results_dir: Path) -> dict:
+    results_dir.mkdir(exist_ok=True)
 
     metrics = {
         "model": model_name,
@@ -29,7 +28,7 @@ def evaluate_and_save(model_name: str, y_true, y_pred, labels) -> dict:
         "f1_score": f1_score(y_true, y_pred, average="weighted", zero_division=0),
     }
 
-    metrics_path = RESULTS_DIR / f"{model_name}_metrics.json"
+    metrics_path = results_dir / f"{model_name}_metrics.json"
     with open(metrics_path, "w", encoding="utf-8") as file:
         json.dump(metrics, file, indent=2)
 
@@ -41,7 +40,7 @@ def evaluate_and_save(model_name: str, y_true, y_pred, labels) -> dict:
         zero_division=0,
     )
     pd.DataFrame(report).transpose().to_csv(
-        RESULTS_DIR / f"{model_name}_classification_report.csv"
+        results_dir / f"{model_name}_classification_report.csv"
     )
 
     matrix = confusion_matrix(y_true, y_pred, labels=labels)
@@ -62,7 +61,7 @@ def evaluate_and_save(model_name: str, y_true, y_pred, labels) -> dict:
     plt.xticks(rotation=90)
     plt.yticks(rotation=0)
     plt.tight_layout()
-    plt.savefig(RESULTS_DIR / f"{model_name}_confusion_matrix.png", dpi=180)
+    plt.savefig(results_dir / f"{model_name}_confusion_matrix.png", dpi=180)
     plt.close()
 
     return metrics
