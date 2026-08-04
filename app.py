@@ -27,7 +27,7 @@ st.caption("Customer support chatbot for Malaysian online shoppers")
 
 page = st.sidebar.radio(
     "Menu",
-    ["Chatbot", "Model Evaluation", "Model Comparison", "About Project"],
+    ["Chatbot", "Model Evaluation", "Model Comparison", "Feedback Records", "About Project"],
 )
 
 if page == "Chatbot":
@@ -157,6 +157,38 @@ elif page == "Model Comparison":
         st.bar_chart(comparison_df.set_index("Model")[["Accuracy", "Precision", "Recall", "F1 Score"]])
     else:
         st.info("Comparison results are not generated yet.")
+
+elif page == "Feedback Records":
+    st.header("Feedback Records")
+
+    if not FEEDBACK_PATH.exists() or FEEDBACK_PATH.stat().st_size == 0:
+        st.info("No feedback records yet.")
+    else:
+        feedback_df = pd.read_csv(FEEDBACK_PATH)
+
+        if feedback_df.empty:
+            st.info("No feedback records yet.")
+        else:
+            feedback_df["rating"] = pd.to_numeric(feedback_df["rating"], errors="coerce")
+            total_feedback = len(feedback_df)
+            average_rating = feedback_df["rating"].mean()
+            latest_rating = feedback_df["rating"].iloc[-1]
+
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Total Feedback", total_feedback)
+            col2.metric("Average Rating", f"{average_rating:.2f} / 5")
+            col3.metric("Latest Rating", f"{latest_rating:.0f} / 5")
+
+            st.subheader("Saved Feedback")
+            st.dataframe(feedback_df.sort_values("timestamp", ascending=False), use_container_width=True)
+
+            intent_summary = (
+                feedback_df.groupby("predicted_intent", as_index=False)
+                .agg(total_feedback=("rating", "count"), average_rating=("rating", "mean"))
+                .sort_values("total_feedback", ascending=False)
+            )
+            st.subheader("Feedback By Intent")
+            st.dataframe(intent_summary, use_container_width=True)
 
 else:
     st.header("About Project")
