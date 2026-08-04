@@ -1,0 +1,64 @@
+from pathlib import Path
+import sys
+import time
+
+import joblib
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.svm import LinearSVC
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+from src.evaluate import evaluate_and_save
+
+
+BASE_DIR = Path(__file__).resolve().parents[1]
+DATA_DIR = BASE_DIR / "data"
+MODELS_DIR = BASE_DIR / "models"
+
+
+def main() -> None:
+    MODELS_DIR.mkdir(exist_ok=True)
+
+    train_df = pd.read_csv(DATA_DIR / "train.csv")
+    test_df = pd.read_csv(DATA_DIR / "test.csv")
+
+    vectorizer = TfidfVectorizer(
+        lowercase=True,
+        ngram_range=(1, 2),
+        max_features=12000,
+        min_df=2,
+    )
+
+    x_train = vectorizer.fit_transform(train_df["text"])
+    x_test = vectorizer.transform(test_df["text"])
+    y_train = train_df["intent"]
+    y_test = test_df["intent"]
+
+    model = LinearSVC(random_state=42)
+    start_time = time.perf_counter()
+    model.fit(x_train, y_train)
+    train_seconds = time.perf_counter() - start_time
+
+    prediction_start = time.perf_counter()
+    predictions = model.predict(x_test)
+    prediction_seconds = time.perf_counter() - prediction_start
+
+    labels = sorted(y_train.unique())
+    metrics = evaluate_and_save("svm", y_test, predictions, labels)
+    metrics["training_time_seconds"] = train_seconds
+    metrics["prediction_time_seconds"] = prediction_seconds
+    metrics["average_prediction_time_ms"] = (prediction_seconds / len(test_df)) * 1000
+
+    joblib.dump(model, MODELS_DIR / "svm_model.pkl")
+    joblib.dump(vectorizer, MODELS_DIR / "tfidf_vectorizer.pkl")
+
+    import json
+
+    with open(BASE_DIR / "results" / "svm_metrics.json", "w", encoding="utf-8") as file:
+        json.dump(metrics, file, indent=2)
+
+    print(metrics)
+
+
+if __name__ == "__main__":
+    main()

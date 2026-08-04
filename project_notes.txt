@@ -1,0 +1,14 @@
+Project title:
+ShopCare MY: A Machine Learning Customer Support Chatbot for Malaysian Online Shoppers
+
+Dataset:
+Bitext Gen AI Chatbot Customer Support Dataset
+
+Main method:
+TF-IDF + Linear SVM
+
+Comparison method:
+TF-IDF + Logistic Regression
+
+Important note:
+Use the same dataset, preprocessing, TF-IDF settings, and train/test split for both models.

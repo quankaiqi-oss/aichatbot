@@ -1,0 +1,10 @@
+{
+  "model": "svm",
+  "accuracy": 0.9925428784489188,
+  "precision": 0.9926478210990537,
+  "recall": 0.9925428784489188,
+  "f1_score": 0.9925423841216394,
+  "training_time_seconds": 1.1279991001356393,
+  "prediction_time_seconds": 0.0027056001126766205,
+  "average_prediction_time_ms": 0.0005043997227212193
+}
