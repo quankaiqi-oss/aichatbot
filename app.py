@@ -174,6 +174,8 @@ st.markdown(
             color: #2d2924;
             font-weight: 600;
             box-shadow: none;
+            min-height: 2.35rem;
+            padding: 0.38rem 0.72rem;
         }
 
         .stButton > button:hover {
@@ -235,6 +237,12 @@ st.markdown(
             background: #eee8dc;
             border-color: #d6ccbc;
             max-width: min(620px, 58%);
+        }
+
+        .quick-reply-title {
+            color: var(--muted);
+            font-size: 0.78rem;
+            margin: 0.1rem 0 0.35rem 2.65rem;
         }
 
         div[data-testid="stExpander"] {
@@ -394,15 +402,15 @@ if page == "Chatbot":
         st.markdown(message_html, unsafe_allow_html=True)
 
     quick_message = None
-    with st.expander("Quick reply suggestions", expanded=True):
-        col1, col2 = st.columns([3, 1])
-        selected_quick_reply = col1.selectbox(
-            "Choose a common support topic",
-            ["Select a topic"] + list(quick_replies.keys()),
-            label_visibility="collapsed",
-        )
-        if col2.button("Send", use_container_width=True) and selected_quick_reply != "Select a topic":
-            quick_message = quick_replies[selected_quick_reply]
+    show_quick_replies = len(st.session_state["chat_history"]) == 1
+    if show_quick_replies:
+        st.caption("Quick topics")
+        first_row = st.columns(4)
+        second_row = st.columns(4)
+        for index, (label, message) in enumerate(quick_replies.items()):
+            row = first_row if index < 4 else second_row
+            if row[index % 4].button(label, use_container_width=True):
+                quick_message = message
 
     user_message = st.chat_input("Type your customer support question...")
     submitted_message = quick_message or user_message
