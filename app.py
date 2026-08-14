@@ -72,6 +72,20 @@ st.markdown(
             transition: all 120ms ease;
         }
 
+        [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
+            background: #4f5f58;
+            border-color: #4f5f58;
+            box-shadow: 0 8px 16px rgba(79, 95, 88, 0.16);
+        }
+
+        [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) * {
+            color: #fffdf8 !important;
+        }
+
+        [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) div[data-testid="stMarkdownContainer"] p {
+            font-weight: 700;
+        }
+
         [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
             background: #fffdf8;
             border-color: rgba(111, 143, 131, 0.42);
@@ -173,6 +187,29 @@ st.markdown(
             box-shadow: none;
             padding-left: 0;
             padding-right: 0;
+        }
+
+        [data-testid="stChatMessageContent"] {
+            width: fit-content;
+            max-width: 82%;
+            padding: 0.78rem 0.95rem;
+            border-radius: 8px;
+            border: 1px solid #ded8ca;
+            background: rgba(255, 253, 248, 0.9);
+        }
+
+        [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
+            flex-direction: row-reverse;
+        }
+
+        [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stChatMessageContent"] {
+            margin-left: auto;
+            background: #eee8dc;
+            border-color: #d6ccbc;
+        }
+
+        [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"]) [data-testid="stChatMessageContent"] {
+            background: #fffdf8;
         }
 
         [data-testid="stChatMessageAvatarAssistant"],
