@@ -157,15 +157,6 @@ st.markdown(
             font-size: 0.95rem;
         }
 
-        .section-panel {
-            background: rgba(255, 255, 255, 0.82);
-            border: 1px solid rgba(216, 224, 234, 0.92);
-            border-radius: 16px;
-            padding: 1.05rem 1.15rem;
-            margin: 0.9rem 0 1rem 0;
-            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.055);
-        }
-
         h2, h3 {
             color: #172033;
             letter-spacing: 0;
@@ -335,8 +326,6 @@ if page == "Chatbot":
         """,
         unsafe_allow_html=True,
     )
-    st.markdown('<div class="section-panel">', unsafe_allow_html=True)
-
     if "chat_history" not in st.session_state:
         st.session_state["chat_history"] = [
             {
@@ -426,12 +415,10 @@ if page == "Chatbot":
                             ]
                         )
                     st.success("Feedback saved.")
-    st.markdown("</div>", unsafe_allow_html=True)
 
 elif page == "Model Evaluation":
     st.header("Model Evaluation")
     st.caption("View how well each model predicts customer support intents on the shared test dataset.")
-    st.markdown('<div class="section-panel">', unsafe_allow_html=True)
     selected_label = st.selectbox("Select model", ["KaiQi SVM", "Kathy Logistic Regression"])
     selected_model = "svm" if selected_label == "KaiQi SVM" else "logistic"
     results_dir = MODEL_RESULT_DIRS[selected_model]
@@ -455,12 +442,10 @@ elif page == "Model Evaluation":
             st.dataframe(pd.read_csv(report_path), use_container_width=True)
     else:
         st.info("Evaluation results are not generated yet.")
-    st.markdown("</div>", unsafe_allow_html=True)
 
 elif page == "Model Comparison":
     st.header("Model Comparison")
     st.caption("Both models use the same dataset, preprocessing, TF-IDF settings, and train-test split for fair comparison.")
-    st.markdown('<div class="section-panel">', unsafe_allow_html=True)
     rows = []
     for model_name in ["svm", "logistic"]:
         metrics_path = MODEL_RESULT_DIRS[model_name] / f"{model_name}_metrics.json"
@@ -485,12 +470,10 @@ elif page == "Model Comparison":
         st.bar_chart(comparison_df.set_index("Model")[["Accuracy", "Precision", "Recall", "F1 Score"]])
     else:
         st.info("Comparison results are not generated yet.")
-    st.markdown("</div>", unsafe_allow_html=True)
 
 elif page == "Feedback Records":
     st.header("Feedback Records")
     st.caption("Saved user ratings support the chatbot usability and satisfaction evaluation.")
-    st.markdown('<div class="section-panel">', unsafe_allow_html=True)
 
     if not FEEDBACK_PATH.exists() or FEEDBACK_PATH.stat().st_size == 0:
         st.info("No feedback records yet.")
@@ -520,12 +503,10 @@ elif page == "Feedback Records":
             )
             st.subheader("Feedback By Intent")
             st.dataframe(intent_summary, use_container_width=True)
-    st.markdown("</div>", unsafe_allow_html=True)
 
 else:
     st.header("About Project")
     st.caption("Project scope, dataset adaptation, and individual model responsibilities.")
-    st.markdown('<div class="section-panel">', unsafe_allow_html=True)
     st.subheader("Title")
     st.write("ShopCare MY: A Machine Learning Customer Support Chatbot for Malaysian Online Shoppers")
     st.subheader("Dataset")
@@ -536,4 +517,3 @@ else:
     st.subheader("Methods")
     st.write("SVM module: TF-IDF + Linear SVM")
     st.write("Comparison module: TF-IDF + Logistic Regression")
-    st.markdown("</div>", unsafe_allow_html=True)
