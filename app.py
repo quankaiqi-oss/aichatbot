@@ -1,6 +1,7 @@
 from pathlib import Path
 from datetime import datetime
 import csv
+import html
 import json
 
 import pandas as pd
@@ -181,62 +182,59 @@ st.markdown(
             color: #2d2924;
         }
 
-        [data-testid="stChatMessage"] {
-            border: none;
-            background: transparent;
-            box-shadow: none;
-            padding: 0.35rem 0;
-            align-items: flex-start;
+        .chat-row {
+            display: flex;
             gap: 0.65rem;
+            align-items: flex-start;
+            margin: 0.85rem 0;
+            width: 100%;
         }
 
-        [data-testid="stChatMessageContent"] {
-            display: inline-block;
-            width: auto;
-            max-width: min(760px, 74%);
-            padding: 0.72rem 0.9rem;
-            border-radius: 10px;
-            border: 1px solid #ded8ca;
-            background: rgba(255, 253, 248, 0.9);
-            line-height: 1.55;
-            box-shadow: 0 5px 14px rgba(43, 41, 37, 0.035);
+        .chat-row.user {
+            justify-content: flex-end;
         }
 
-        [data-testid="stChatMessageContent"] p {
-            margin-bottom: 0;
-        }
-
-        [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
-            flex-direction: row-reverse;
+        .chat-row.assistant {
             justify-content: flex-start;
         }
 
-        [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stChatMessageContent"] {
-            margin-left: auto;
+        .chat-avatar {
+            width: 2rem;
+            height: 2rem;
+            min-width: 2rem;
+            border-radius: 8px;
+            background: #e6dfd1;
+            border: 1px solid #d2c8b8;
+            color: #4f5f58;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .chat-bubble {
+            display: inline-block;
+            width: fit-content;
+            max-width: min(760px, 72%);
+            padding: 0.72rem 0.9rem;
+            border-radius: 10px;
+            border: 1px solid #ded8ca;
+            line-height: 1.55;
+            box-shadow: 0 5px 14px rgba(43, 41, 37, 0.035);
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+        }
+
+        .chat-row.assistant .chat-bubble {
+            background: #fffdf8;
+        }
+
+        .chat-row.user .chat-bubble {
             background: #eee8dc;
             border-color: #d6ccbc;
-            max-width: min(620px, 64%);
-        }
-
-        [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"]) [data-testid="stChatMessageContent"] {
-            background: #fffdf8;
-            margin-right: auto;
-        }
-
-        [data-testid="stChatMessageAvatarAssistant"],
-        [data-testid="stChatMessageAvatarUser"] {
-            background-color: #e6dfd1 !important;
-            color: #4f5f58 !important;
-            border: 1px solid #d2c8b8;
-            width: 2rem !important;
-            height: 2rem !important;
-            min-width: 2rem !important;
-            margin-top: 0.15rem;
-        }
-
-        [data-testid="stChatMessageAvatarAssistant"] svg,
-        [data-testid="stChatMessageAvatarUser"] svg {
-            fill: #4f5f58 !important;
+            max-width: min(620px, 58%);
         }
 
         div[data-testid="stExpander"] {
@@ -249,36 +247,6 @@ st.markdown(
             border: 1px solid var(--line);
             border-radius: 8px;
             overflow: hidden;
-        }
-
-        .help-panel {
-            background: #fffdf8;
-            border: 1px solid var(--line);
-            border-left: 4px solid #9b9486;
-            border-radius: 8px;
-            padding: 1rem 1.1rem;
-            margin: 0.8rem 0 1rem 0;
-            box-shadow: 0 8px 18px rgba(43, 41, 37, 0.04);
-        }
-
-        .help-panel strong {
-            color: #2d2924;
-        }
-
-        .help-panel p {
-            margin: 0.25rem 0;
-            color: var(--muted);
-        }
-
-        .sample-chip {
-            display: inline-block;
-            margin: 0.18rem 0.25rem 0.18rem 0;
-            padding: 0.32rem 0.58rem;
-            border: 1px solid #d6ccbc;
-            border-radius: 6px;
-            background: #fbf8f1;
-            color: #4b463f;
-            font-size: 0.82rem;
         }
 
         .stSelectbox div[data-baseweb="select"] > div {
@@ -394,20 +362,6 @@ if page == "Chatbot":
         "Complaint": "I want to make a complaint",
     }
 
-    st.markdown(
-        """
-        <div class="help-panel">
-            <strong>How to use</strong>
-            <p>Type a customer support question, or choose a common topic from Quick reply suggestions.</p>
-            <p>The message is still processed by the trained machine learning model for intent prediction.</p>
-            <span class="sample-chip">Where is my parcel?</span>
-            <span class="sample-chip">My payment failed</span>
-            <span class="sample-chip">I want a refund</span>
-            <span class="sample-chip">I forgot my password</span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
     if "chat_history" not in st.session_state:
         st.session_state["chat_history"] = [
             {
@@ -420,8 +374,24 @@ if page == "Chatbot":
         ]
 
     for message in st.session_state["chat_history"]:
-        with st.chat_message(message["role"]):
-            st.write(message["content"])
+        role = message["role"]
+        avatar = "ME" if role == "user" else "AI"
+        safe_content = html.escape(message["content"])
+        if role == "user":
+            message_html = f"""
+            <div class="chat-row user">
+                <div class="chat-bubble">{safe_content}</div>
+                <div class="chat-avatar">{avatar}</div>
+            </div>
+            """
+        else:
+            message_html = f"""
+            <div class="chat-row assistant">
+                <div class="chat-avatar">{avatar}</div>
+                <div class="chat-bubble">{safe_content}</div>
+            </div>
+            """
+        st.markdown(message_html, unsafe_allow_html=True)
 
     quick_message = None
     with st.expander("Quick reply suggestions", expanded=True):
