@@ -164,6 +164,36 @@ st.markdown(
             overflow: hidden;
         }
 
+        .help-panel {
+            background: #ffffff;
+            border: 1px solid var(--line);
+            border-left: 5px solid var(--primary);
+            border-radius: 12px;
+            padding: 1rem 1.1rem;
+            margin: 0.8rem 0 1rem 0;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+        }
+
+        .help-panel strong {
+            color: #10233f;
+        }
+
+        .help-panel p {
+            margin: 0.25rem 0;
+            color: var(--muted);
+        }
+
+        .sample-chip {
+            display: inline-block;
+            margin: 0.18rem 0.25rem 0.18rem 0;
+            padding: 0.32rem 0.58rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 999px;
+            background: #f8fafc;
+            color: #334155;
+            font-size: 0.82rem;
+        }
+
         @media (max-width: 760px) {
             .app-hero {
                 display: block;
@@ -204,8 +234,12 @@ page = st.sidebar.radio(
 
 if page == "Chatbot":
     st.header("Real-Time Chatbot")
-    st.caption("Type naturally or use the quick reply dropdown. Every message is still processed by the ML model.")
-    model_type = st.sidebar.radio("Chatbot model", ["svm", "logistic"])
+    st.caption("Ask about online-shopping support issues and get an immediate chatbot reply.")
+    model_label = st.sidebar.radio(
+        "Chatbot model",
+        ["KaiQi SVM", "Kathy Logistic Regression"],
+    )
+    model_type = "svm" if model_label == "KaiQi SVM" else "logistic"
     quick_replies = {
         "Track Order": "I want to track my order",
         "Request Refund": "I want to request a refund",
@@ -216,6 +250,21 @@ if page == "Chatbot":
         "Contact Support": "I want to contact customer support",
         "Complaint": "I want to make a complaint",
     }
+
+    st.markdown(
+        """
+        <div class="help-panel">
+            <strong>How to use</strong>
+            <p>Type a customer support question, or choose a common topic from Quick reply suggestions.</p>
+            <p>The message is still processed by the trained machine learning model for intent prediction.</p>
+            <span class="sample-chip">Where is my parcel?</span>
+            <span class="sample-chip">My payment failed</span>
+            <span class="sample-chip">I want a refund</span>
+            <span class="sample-chip">I forgot my password</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     if "chat_history" not in st.session_state:
         st.session_state["chat_history"] = [
@@ -239,10 +288,11 @@ if page == "Chatbot":
                     details += f" | Fallback used: {message.get('fallback_reason', 'Low confidence')}"
                 if message.get("confidence") is not None:
                     details += f" | Decision score: {message['confidence']:.3f}"
-                st.caption(details)
+                with st.expander("Technical prediction details", expanded=False):
+                    st.caption(details)
 
     quick_message = None
-    with st.expander("Quick reply suggestions", expanded=False):
+    with st.expander("Quick reply suggestions", expanded=True):
         col1, col2 = st.columns([3, 1])
         selected_quick_reply = col1.selectbox(
             "Choose a common support topic",
@@ -280,17 +330,17 @@ if page == "Chatbot":
             st.error("Model files are missing. Please run preprocessing and training first.")
 
     col1, col2 = st.columns([1, 4])
-    if col1.button("Clear Chat"):
+    if col1.button("Start New Chat"):
         st.session_state.pop("chat_history", None)
         st.session_state.pop("last_prediction", None)
         st.rerun()
 
     if "last_prediction" in st.session_state:
-        with st.expander("Save feedback for latest response"):
+        with st.expander("Rate the latest response"):
             result = st.session_state["last_prediction"]
             with st.form("feedback_form"):
-                rating = st.slider("Was this response useful?", 1, 5, 4)
-                comment = st.text_input("Comment")
+                rating = st.slider("How useful was this response?", 1, 5, 4)
+                comment = st.text_input("Optional comment")
                 submitted = st.form_submit_button("Save Feedback")
                 if submitted:
                     with open(FEEDBACK_PATH, "a", newline="", encoding="utf-8") as file:
@@ -308,8 +358,9 @@ if page == "Chatbot":
 
 elif page == "Model Evaluation":
     st.header("Model Evaluation")
-    st.caption("View the selected model's classification performance on the shared test dataset.")
-    selected_model = st.selectbox("Select model", ["svm", "logistic"])
+    st.caption("View how well each model predicts customer support intents on the shared test dataset.")
+    selected_label = st.selectbox("Select model", ["KaiQi SVM", "Kathy Logistic Regression"])
+    selected_model = "svm" if selected_label == "KaiQi SVM" else "logistic"
     results_dir = MODEL_RESULT_DIRS[selected_model]
     metrics_path = results_dir / f"{selected_model}_metrics.json"
     report_path = results_dir / f"{selected_model}_classification_report.csv"
@@ -326,13 +377,15 @@ elif page == "Model Evaluation":
         )
 
         if report_path.exists():
+            st.subheader("Per-Intent Classification Report")
+            st.caption("This table shows how well the model performs for each support intent.")
             st.dataframe(pd.read_csv(report_path), use_container_width=True)
     else:
         st.info("Evaluation results are not generated yet.")
 
 elif page == "Model Comparison":
     st.header("Model Comparison")
-    st.caption("Both models use the same dataset, preprocessing, TF-IDF settings, and train-test split.")
+    st.caption("Both models use the same dataset, preprocessing, TF-IDF settings, and train-test split for fair comparison.")
     rows = []
     for model_name in ["svm", "logistic"]:
         metrics_path = MODEL_RESULT_DIRS[model_name] / f"{model_name}_metrics.json"
@@ -351,7 +404,9 @@ elif page == "Model Comparison":
 
     if rows:
         comparison_df = pd.DataFrame(rows)
+        st.subheader("Overall Comparison")
         st.dataframe(comparison_df, use_container_width=True)
+        st.subheader("Metric Chart")
         st.bar_chart(comparison_df.set_index("Model")[["Accuracy", "Precision", "Recall", "F1 Score"]])
     else:
         st.info("Comparison results are not generated yet.")
