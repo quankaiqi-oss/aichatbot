@@ -185,31 +185,42 @@ st.markdown(
             border: none;
             background: transparent;
             box-shadow: none;
-            padding-left: 0;
-            padding-right: 0;
+            padding: 0.35rem 0;
+            align-items: flex-start;
+            gap: 0.65rem;
         }
 
         [data-testid="stChatMessageContent"] {
-            width: fit-content;
-            max-width: 82%;
-            padding: 0.78rem 0.95rem;
-            border-radius: 8px;
+            display: inline-block;
+            width: auto;
+            max-width: min(760px, 74%);
+            padding: 0.72rem 0.9rem;
+            border-radius: 10px;
             border: 1px solid #ded8ca;
             background: rgba(255, 253, 248, 0.9);
+            line-height: 1.55;
+            box-shadow: 0 5px 14px rgba(43, 41, 37, 0.035);
+        }
+
+        [data-testid="stChatMessageContent"] p {
+            margin-bottom: 0;
         }
 
         [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
             flex-direction: row-reverse;
+            justify-content: flex-start;
         }
 
         [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stChatMessageContent"] {
             margin-left: auto;
             background: #eee8dc;
             border-color: #d6ccbc;
+            max-width: min(620px, 64%);
         }
 
         [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"]) [data-testid="stChatMessageContent"] {
             background: #fffdf8;
+            margin-right: auto;
         }
 
         [data-testid="stChatMessageAvatarAssistant"],
@@ -217,6 +228,10 @@ st.markdown(
             background-color: #e6dfd1 !important;
             color: #4f5f58 !important;
             border: 1px solid #d2c8b8;
+            width: 2rem !important;
+            height: 2rem !important;
+            min-width: 2rem !important;
+            margin-top: 0.15rem;
         }
 
         [data-testid="stChatMessageAvatarAssistant"] svg,
@@ -278,14 +293,42 @@ st.markdown(
 
         [data-testid="stChatInput"] textarea {
             background-color: #fbf8f1 !important;
-            border: 1px solid #d6ccbc !important;
+            border: none !important;
             color: #2d2924 !important;
+            min-height: 52px !important;
+            padding: 0.9rem 1rem !important;
+            font-size: 0.98rem !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+        [data-testid="stChatInput"] textarea:focus {
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+        [data-testid="stChatInput"] > div {
+            background: #fbf8f1 !important;
+            border: 1px solid #d6ccbc !important;
+            border-radius: 10px !important;
+            min-height: 66px !important;
+            padding: 0.35rem 0.45rem !important;
+            box-shadow: 0 8px 18px rgba(43, 41, 37, 0.055) !important;
+        }
+
+        [data-testid="stChatInput"] > div:focus-within {
+            border-color: #a89d8d !important;
+            box-shadow: 0 10px 22px rgba(43, 41, 37, 0.08) !important;
         }
 
         [data-testid="stChatInput"] button {
             background-color: #e6dfd1 !important;
             color: #4f5f58 !important;
             border: 1px solid #d2c8b8 !important;
+            border-radius: 8px !important;
+            min-width: 44px !important;
+            min-height: 44px !important;
         }
 
         @media (max-width: 760px) {
