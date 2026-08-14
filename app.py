@@ -64,23 +64,33 @@ st.markdown(
             color: #2d2924 !important;
         }
 
+        [data-testid="stSidebar"] > div:first-child {
+            padding-top: 2.2rem;
+        }
+
+        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+        [data-testid="stSidebar"] label {
+            font-size: 0.9rem;
+        }
+
         [data-testid="stSidebar"] div[role="radiogroup"] label {
-            background: rgba(255, 253, 248, 0.72);
-            border: 1px solid rgba(120, 111, 96, 0.18);
-            border-radius: 6px;
-            margin: 0.28rem 0;
-            padding: 0.32rem 0.5rem;
-            transition: all 120ms ease;
+            background: transparent !important;
+            border: 0 !important;
+            border-left: 3px solid transparent !important;
+            border-radius: 0 !important;
+            margin: 0.15rem 0;
+            padding: 0.48rem 0.35rem 0.48rem 0.72rem;
+            transition: background 140ms ease, border-color 140ms ease;
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
-            background: #4f5f58;
-            border-color: #4f5f58;
-            box-shadow: 0 8px 16px rgba(79, 95, 88, 0.16);
+            background: rgba(255, 253, 248, 0.58) !important;
+            border-left-color: #4f5f58 !important;
+            box-shadow: none;
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) * {
-            color: #fffdf8 !important;
+            color: #2b3e37 !important;
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) div[data-testid="stMarkdownContainer"] p {
@@ -88,8 +98,18 @@ st.markdown(
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
-            background: #fffdf8;
-            border-color: rgba(111, 143, 131, 0.42);
+            background: rgba(255, 253, 248, 0.42) !important;
+            border-left-color: rgba(79, 95, 88, 0.34) !important;
+        }
+
+        [data-testid="stSidebar"] div[role="radiogroup"] label > div:first-child {
+            transform: scale(0.72);
+            opacity: 0.58;
+            margin-right: 0.12rem;
+        }
+
+        [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) > div:first-child {
+            opacity: 0.86;
         }
 
         .app-hero {
