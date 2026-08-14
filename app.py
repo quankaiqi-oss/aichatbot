@@ -138,7 +138,6 @@ elif page == "Model Evaluation":
     selected_model = st.selectbox("Select model", ["svm", "logistic"])
     results_dir = MODEL_RESULT_DIRS[selected_model]
     metrics_path = results_dir / f"{selected_model}_metrics.json"
-    matrix_path = results_dir / f"{selected_model}_confusion_matrix.png"
     report_path = results_dir / f"{selected_model}_classification_report.csv"
 
     if metrics_path.exists():
@@ -152,8 +151,6 @@ elif page == "Model Evaluation":
             f"Average prediction time: {metrics.get('average_prediction_time_ms', 0):.4f} ms"
         )
 
-        if matrix_path.exists():
-            st.image(str(matrix_path), caption=f"{selected_model.upper()} confusion matrix")
         if report_path.exists():
             st.dataframe(pd.read_csv(report_path), use_container_width=True)
     else:
