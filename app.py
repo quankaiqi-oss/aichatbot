@@ -26,22 +26,23 @@ st.markdown(
     """
     <style>
         :root {
-            --primary: #0f766e;
-            --primary-dark: #0f4f4a;
-            --accent: #c08a2c;
-            --ink: #111827;
-            --muted: #65758b;
-            --panel: #ffffff;
-            --soft: #f6f8fb;
-            --line: #d8e0ea;
-            --navy: #101827;
-            --navy-soft: #1f2a3d;
+            --primary: #6f8f83;
+            --primary-dark: #405f58;
+            --accent: #b7874d;
+            --ink: #24211d;
+            --muted: #746f66;
+            --panel: #fffdf8;
+            --soft: #f6f3ed;
+            --line: #ded8ca;
+            --charcoal: #2b2925;
+            --paper: #fbf7ef;
         }
 
         .stApp {
             background:
-                radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 34rem),
-                linear-gradient(180deg, #f4f8f7 0%, #f7f9fc 300px, #ffffff 720px);
+                linear-gradient(90deg, rgba(43, 41, 37, 0.018) 1px, transparent 1px),
+                linear-gradient(180deg, #f7f3eb 0%, #fbfaf6 340px, #ffffff 820px);
+            background-size: 28px 28px, auto;
             color: var(--ink);
         }
 
@@ -52,40 +53,41 @@ st.markdown(
         }
 
         [data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #0b1220 0%, #111827 100%);
+            background: linear-gradient(180deg, #ebe4d7 0%, #f7f3eb 100%);
+            border-right: 1px solid #d8d0c0;
         }
 
         [data-testid="stSidebar"] * {
-            color: #e5eef7 !important;
+            color: #2d2924 !important;
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label {
-            background: rgba(255, 255, 255, 0.055);
-            border: 1px solid rgba(255, 255, 255, 0.09);
-            border-radius: 10px;
+            background: rgba(255, 253, 248, 0.72);
+            border: 1px solid rgba(120, 111, 96, 0.18);
+            border-radius: 6px;
             margin: 0.28rem 0;
             padding: 0.32rem 0.5rem;
             transition: all 120ms ease;
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
-            background: rgba(15, 118, 110, 0.22);
-            border-color: rgba(153, 246, 228, 0.35);
+            background: #fffdf8;
+            border-color: rgba(111, 143, 131, 0.42);
         }
 
         .app-hero {
             background:
-                linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.9));
-            border: 1px solid rgba(216, 224, 234, 0.9);
-            border-radius: 18px;
+                linear-gradient(135deg, rgba(255, 253, 248, 0.96), rgba(242, 238, 228, 0.9));
+            border: 1px solid rgba(184, 174, 157, 0.55);
+            border-radius: 10px;
             padding: 1.55rem 1.75rem;
             margin-bottom: 0.9rem;
             box-shadow:
-                0 24px 60px rgba(15, 23, 42, 0.09),
-                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+                0 16px 36px rgba(43, 41, 37, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.75);
             display: flex;
             justify-content: space-between;
-            gap: 1rem;
+            gap: 1.3rem;
             align-items: center;
         }
 
@@ -105,7 +107,7 @@ st.markdown(
 
         .eyebrow {
             margin-bottom: 0.35rem !important;
-            color: var(--accent) !important;
+            color: #87633a !important;
             font-size: 0.78rem !important;
             font-weight: 700;
             letter-spacing: 0;
@@ -121,12 +123,46 @@ st.markdown(
         }
 
         .hero-pills span {
-            background: rgba(15, 118, 110, 0.08);
-            color: #0f4f4a;
-            border: 1px solid rgba(15, 118, 110, 0.18);
-            border-radius: 999px;
+            background: rgba(255, 253, 248, 0.86);
+            color: #405f58;
+            border: 1px solid rgba(111, 143, 131, 0.24);
+            border-radius: 6px;
             padding: 0.38rem 0.68rem;
             font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .instax-card {
+            width: 172px;
+            min-width: 172px;
+            background: #fffefb;
+            border: 1px solid #e7dfd0;
+            border-radius: 5px;
+            padding: 0.55rem 0.55rem 1.15rem 0.55rem;
+            box-shadow: 0 14px 24px rgba(43, 41, 37, 0.12);
+            transform: rotate(1.4deg);
+        }
+
+        .instax-frame {
+            height: 112px;
+            border-radius: 3px;
+            background:
+                linear-gradient(135deg, rgba(111, 143, 131, 0.9), rgba(64, 95, 88, 0.94)),
+                linear-gradient(45deg, transparent 45%, rgba(255, 255, 255, 0.16) 45% 55%, transparent 55%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fffdf8;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .instax-caption {
+            margin: 0.55rem 0 0 0;
+            color: #6c655c;
+            font-size: 0.76rem;
+            text-align: center;
             font-weight: 600;
         }
 
@@ -138,11 +174,11 @@ st.markdown(
         }
 
         .status-card {
-            background: rgba(255, 255, 255, 0.82);
-            border: 1px solid rgba(216, 224, 234, 0.9);
-            border-radius: 14px;
+            background: rgba(255, 253, 248, 0.88);
+            border: 1px solid rgba(184, 174, 157, 0.48);
+            border-radius: 8px;
             padding: 0.8rem 0.9rem;
-            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.045);
+            box-shadow: 0 8px 18px rgba(43, 41, 37, 0.045);
         }
 
         .status-card small {
@@ -153,69 +189,69 @@ st.markdown(
         }
 
         .status-card strong {
-            color: #10233f;
+            color: #2d2924;
             font-size: 0.95rem;
         }
 
         h2, h3 {
-            color: #172033;
+            color: #2d2924;
             letter-spacing: 0;
         }
 
         [data-testid="stMetric"] {
-            background: rgba(255, 255, 255, 0.88);
+            background: rgba(255, 253, 248, 0.9);
             border: 1px solid var(--line);
-            border-radius: 14px;
+            border-radius: 8px;
             padding: 1rem;
-            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.055);
+            box-shadow: 0 9px 20px rgba(43, 41, 37, 0.05);
         }
 
         .stButton > button {
-            border-radius: 10px;
-            border: 1px solid rgba(15, 118, 110, 0.8);
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 6px;
+            border: 1px solid rgba(64, 95, 88, 0.75);
+            background: #405f58;
             color: white;
             font-weight: 650;
-            box-shadow: 0 8px 18px rgba(15, 118, 110, 0.18);
+            box-shadow: 0 7px 14px rgba(64, 95, 88, 0.14);
         }
 
         .stButton > button:hover {
             border-color: var(--primary-dark);
-            background: linear-gradient(135deg, var(--primary-dark), #0b3f3b);
+            background: #2f4842;
             color: white;
         }
 
         [data-testid="stChatMessage"] {
-            border-radius: 12px;
-            border: 1px solid #e5edf5;
-            background: rgba(255, 255, 255, 0.88);
-            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.045);
+            border-radius: 8px;
+            border: 1px solid #e3dccf;
+            background: rgba(255, 253, 248, 0.92);
+            box-shadow: 0 8px 18px rgba(43, 41, 37, 0.04);
         }
 
         div[data-testid="stExpander"] {
             border: 1px solid var(--line);
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.78);
+            border-radius: 8px;
+            background: rgba(255, 253, 248, 0.8);
         }
 
         [data-testid="stDataFrame"] {
             border: 1px solid var(--line);
-            border-radius: 10px;
+            border-radius: 8px;
             overflow: hidden;
         }
 
         .help-panel {
-            background: #ffffff;
+            background: #fffdf8;
             border: 1px solid var(--line);
-            border-left: 5px solid var(--accent);
-            border-radius: 14px;
+            border-left: 5px solid #6f8f83;
+            border-radius: 8px;
             padding: 1rem 1.1rem;
             margin: 0.8rem 0 1rem 0;
-            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.045);
+            box-shadow: 0 8px 18px rgba(43, 41, 37, 0.04);
         }
 
         .help-panel strong {
-            color: #10233f;
+            color: #2d2924;
         }
 
         .help-panel p {
@@ -227,15 +263,15 @@ st.markdown(
             display: inline-block;
             margin: 0.18rem 0.25rem 0.18rem 0;
             padding: 0.32rem 0.58rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 999px;
-            background: #f8fafc;
-            color: #334155;
+            border: 1px solid #d8d0c0;
+            border-radius: 6px;
+            background: #f6f3ed;
+            color: #4b463f;
             font-size: 0.82rem;
         }
 
         .stSelectbox div[data-baseweb="select"] > div {
-            border-radius: 10px;
+            border-radius: 7px;
             border-color: var(--line);
         }
 
@@ -247,6 +283,11 @@ st.markdown(
             .hero-pills {
                 justify-content: flex-start;
                 margin-top: 1rem;
+            }
+
+            .instax-card {
+                margin-top: 1rem;
+                transform: rotate(0deg);
             }
 
             .status-strip {
@@ -265,11 +306,15 @@ st.markdown(
             <p class="eyebrow">Machine Learning Chatbot Prototype</p>
             <h1>ShopCare MY</h1>
             <p>Customer support chatbot for Malaysian online shoppers, powered by TF-IDF intent classification.</p>
+            <div class="hero-pills">
+                <span>Linear SVM</span>
+                <span>Logistic Regression</span>
+                <span>Feedback Analysis</span>
+            </div>
         </div>
-        <div class="hero-pills">
-            <span>Linear SVM</span>
-            <span>Logistic Regression</span>
-            <span>Feedback Analysis</span>
+        <div class="instax-card">
+            <div class="instax-frame">Intent<br>Support<br>Assistant</div>
+            <p class="instax-caption">ShopCare MY / 2026</p>
         </div>
     </div>
     """,
@@ -340,16 +385,6 @@ if page == "Chatbot":
     for message in st.session_state["chat_history"]:
         with st.chat_message(message["role"]):
             st.write(message["content"])
-            if message["role"] == "assistant" and "intent" in message:
-                details = f"Intent: {message['intent']} | Model: {message['model'].upper()}"
-                if message.get("model_intent") and message["model_intent"] != message["intent"]:
-                    details += f" | Raw model: {message['model_intent']}"
-                if message.get("used_fallback"):
-                    details += f" | Fallback used: {message.get('fallback_reason', 'Low confidence')}"
-                if message.get("confidence") is not None:
-                    details += f" | Decision score: {message['confidence']:.3f}"
-                with st.expander("Technical prediction details", expanded=False):
-                    st.caption(details)
 
     quick_message = None
     with st.expander("Quick reply suggestions", expanded=True):
