@@ -1,6 +1,5 @@
 from pathlib import Path
 from datetime import datetime
-from html import escape
 import csv
 import json
 
@@ -188,93 +187,6 @@ st.markdown(
             fill: #4f5f58 !important;
         }
 
-        .chat-thread {
-            display: flex;
-            flex-direction: column;
-            gap: 0.72rem;
-            margin: 1rem 0 1.2rem 0;
-        }
-
-        .chat-row {
-            display: flex;
-            align-items: flex-end;
-            gap: 0.58rem;
-            max-width: 76%;
-        }
-
-        .chat-row.assistant {
-            align-self: flex-start;
-        }
-
-        .chat-row.user {
-            align-self: flex-end;
-            flex-direction: row-reverse;
-        }
-
-        .chat-avatar {
-            width: 2.25rem;
-            height: 2.25rem;
-            flex: 0 0 2.25rem;
-            display: grid;
-            place-items: center;
-            border-radius: 8px;
-            border: 1px solid #cfc6b8;
-            font-size: 0.68rem;
-            font-weight: 800;
-            letter-spacing: 0;
-            box-shadow: 0 4px 10px rgba(43, 41, 37, 0.07);
-        }
-
-        .chat-row.assistant .chat-avatar {
-            background: #efe7d8;
-            color: #4f5f58;
-        }
-
-        .chat-row.user .chat-avatar {
-            background: #4f6f63;
-            border-color: #435f55;
-            color: #ffffff;
-        }
-
-        .chat-bubble {
-            padding: 0.78rem 0.92rem;
-            border-radius: 8px;
-            font-size: 0.96rem;
-            line-height: 1.55;
-            box-shadow: 0 7px 16px rgba(43, 41, 37, 0.055);
-        }
-
-        .chat-row.assistant .chat-bubble {
-            background: #fffdf8;
-            border: 1px solid #ded8ca;
-            color: #24211d;
-            border-bottom-left-radius: 3px;
-        }
-
-        .chat-row.user .chat-bubble {
-            background: #4f6f63;
-            border: 1px solid #435f55;
-            color: #ffffff;
-            border-bottom-right-radius: 3px;
-        }
-
-        .chat-label {
-            display: block;
-            margin-bottom: 0.22rem;
-            font-size: 0.69rem;
-            font-weight: 800;
-            letter-spacing: 0;
-            text-transform: uppercase;
-        }
-
-        .chat-row.assistant .chat-label {
-            color: #7a6750;
-        }
-
-        .chat-row.user .chat-label {
-            color: rgba(255, 255, 255, 0.82);
-        }
-
         div[data-testid="stExpander"] {
             border: 1px solid var(--line);
             border-radius: 8px;
@@ -346,10 +258,6 @@ st.markdown(
 
             .status-strip {
                 grid-template-columns: 1fr 1fr;
-            }
-
-            .chat-row {
-                max-width: 92%;
             }
         }
     </style>
@@ -431,25 +339,9 @@ if page == "Chatbot":
             }
         ]
 
-    chat_html = ['<div class="chat-thread">']
     for message in st.session_state["chat_history"]:
-        role = "user" if message["role"] == "user" else "assistant"
-        avatar = "YOU" if role == "user" else "BOT"
-        label = "You" if role == "user" else "ShopCare MY"
-        content = escape(message["content"]).replace("\n", "<br>")
-        chat_html.append(
-            f"""
-            <div class="chat-row {role}">
-                <div class="chat-avatar">{avatar}</div>
-                <div class="chat-bubble">
-                    <span class="chat-label">{label}</span>
-                    {content}
-                </div>
-            </div>
-            """
-        )
-    chat_html.append("</div>")
-    st.markdown("".join(chat_html), unsafe_allow_html=True)
+        with st.chat_message(message["role"]):
+            st.write(message["content"])
 
     quick_message = None
     with st.expander("Quick reply suggestions", expanded=True):
