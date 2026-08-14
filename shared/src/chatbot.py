@@ -13,6 +13,14 @@ MODEL_DIRS = {
     "logistic": BASE_DIR / "kathy_logistic" / "models",
 }
 DATASET_PATH = BASE_DIR / "data" / "chatbot_dataset_clean.csv"
+SVM_CONFIDENCE_THRESHOLD = 0.15
+LOGISTIC_CONFIDENCE_THRESHOLD = 0.40
+
+FALLBACK_RESPONSE = (
+    "I am not confident I understood your request. Please type a clearer topic "
+    "such as order tracking, refund, payment issue, delivery, account problem, "
+    "or complaint."
+)
 
 INTENT_RESPONSES = {
     "track_order": (
@@ -114,7 +122,7 @@ def predict_intent(message: str, model_type: str = "svm") -> dict:
     cleaned = clean_text(message)
     vector = vectorizer.transform([cleaned])
     model_intent = model.predict(vector)[0]
-    intent = rule_based_intent(cleaned) or model_intent
+    rule_intent = rule_based_intent(cleaned)
 
     confidence = None
     if hasattr(model, "decision_function"):
@@ -123,8 +131,23 @@ def predict_intent(message: str, model_type: str = "svm") -> dict:
     elif hasattr(model, "predict_proba"):
         confidence = float(model.predict_proba(vector).max())
 
+    used_fallback = False
+    fallback_reason = None
+    if rule_intent:
+        intent = rule_intent
+    elif model_type == "svm" and confidence is not None and confidence < SVM_CONFIDENCE_THRESHOLD:
+        intent = "fallback"
+        used_fallback = True
+        fallback_reason = "Low SVM decision score"
+    elif model_type == "logistic" and confidence is not None and confidence < LOGISTIC_CONFIDENCE_THRESHOLD:
+        intent = "fallback"
+        used_fallback = True
+        fallback_reason = "Low Logistic Regression probability"
+    else:
+        intent = model_intent
+
     matching = responses_df[responses_df["intent"] == intent]["response"].dropna().tolist()
-    response = INTENT_RESPONSES.get(intent)
+    response = FALLBACK_RESPONSE if used_fallback else INTENT_RESPONSES.get(intent)
     if response is None:
         response = random.choice(matching) if matching else "I can help with your customer support request."
 
@@ -132,5 +155,7 @@ def predict_intent(message: str, model_type: str = "svm") -> dict:
         "intent": intent,
         "model_intent": model_intent,
         "confidence": confidence,
+        "used_fallback": used_fallback,
+        "fallback_reason": fallback_reason,
         "response": format_response(response),
     }

@@ -52,6 +52,8 @@ if page == "Chatbot":
                 details = f"Intent: {message['intent']} | Model: {message['model'].upper()}"
                 if message.get("model_intent") and message["model_intent"] != message["intent"]:
                     details += f" | Raw model: {message['model_intent']}"
+                if message.get("used_fallback"):
+                    details += f" | Fallback used: {message.get('fallback_reason', 'Low confidence')}"
                 if message.get("confidence") is not None:
                     details += f" | Decision score: {message['confidence']:.3f}"
                 st.caption(details)
@@ -72,6 +74,8 @@ if page == "Chatbot":
                 "intent": result["intent"],
                 "model_intent": result.get("model_intent"),
                 "confidence": result["confidence"],
+                "used_fallback": result.get("used_fallback", False),
+                "fallback_reason": result.get("fallback_reason"),
                 "user_message": user_message,
             }
             st.session_state["chat_history"].append(assistant_message)
