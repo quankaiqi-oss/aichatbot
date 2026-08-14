@@ -81,55 +81,35 @@ st.markdown(
             background:
                 linear-gradient(135deg, rgba(255, 253, 248, 0.96), rgba(242, 238, 228, 0.9));
             border: 1px solid rgba(184, 174, 157, 0.55);
-            border-radius: 10px;
-            padding: 1rem 1.2rem;
-            margin-bottom: 0.9rem;
+            border-radius: 8px;
+            padding: 0.72rem 1rem;
+            margin-bottom: 0.75rem;
             box-shadow:
-                0 10px 24px rgba(43, 41, 37, 0.055),
+                0 6px 16px rgba(43, 41, 37, 0.045),
                 inset 0 1px 0 rgba(255, 255, 255, 0.75);
-            display: flex;
-            justify-content: space-between;
-            gap: 1.3rem;
-            align-items: center;
         }
 
         .app-hero h1 {
             margin: 0;
             color: #10233f;
-            font-size: 1.65rem;
+            font-size: 1.38rem;
             line-height: 1.1;
             letter-spacing: 0;
         }
 
         .app-hero p {
-            margin: 0.32rem 0 0 0;
+            margin: 0.22rem 0 0 0;
             color: var(--muted);
-            font-size: 0.9rem;
+            font-size: 0.84rem;
         }
 
         .eyebrow {
-            margin-bottom: 0.25rem !important;
+            margin-bottom: 0.18rem !important;
             color: #87633a !important;
-            font-size: 0.72rem !important;
+            font-size: 0.68rem !important;
             font-weight: 700;
             letter-spacing: 0;
             text-transform: uppercase;
-        }
-
-        .logo-mark {
-            width: 42px;
-            height: 42px;
-            min-width: 42px;
-            border-radius: 7px;
-            background: #fffefb;
-            border: 1px solid #ded8ca;
-            box-shadow: 0 8px 14px rgba(43, 41, 37, 0.08);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #405f58;
-            font-weight: 800;
-            font-size: 0.95rem;
         }
 
         .status-strip {
@@ -188,10 +168,11 @@ st.markdown(
         }
 
         [data-testid="stChatMessage"] {
-            border-radius: 8px;
-            border: 1px solid #e3dccf;
-            background: rgba(255, 253, 248, 0.92);
-            box-shadow: 0 8px 18px rgba(43, 41, 37, 0.04);
+            border: none;
+            background: transparent;
+            box-shadow: none;
+            padding-left: 0;
+            padding-right: 0;
         }
 
         div[data-testid="stExpander"] {
@@ -263,7 +244,6 @@ st.markdown(
             <h1>ShopCare MY</h1>
             <p>Customer support chatbot for Malaysian online shoppers, powered by TF-IDF intent classification.</p>
         </div>
-        <div class="logo-mark">SC</div>
     </div>
     """,
     unsafe_allow_html=True,
