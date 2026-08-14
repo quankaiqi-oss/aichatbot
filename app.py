@@ -26,9 +26,9 @@ st.markdown(
     """
     <style>
         :root {
-            --primary: #6f8f83;
-            --primary-dark: #405f58;
-            --accent: #b7874d;
+            --primary: #7f8f83;
+            --primary-dark: #4f5f58;
+            --accent: #9b8366;
             --ink: #24211d;
             --muted: #746f66;
             --panel: #fffdf8;
@@ -154,17 +154,17 @@ st.markdown(
 
         .stButton > button {
             border-radius: 6px;
-            border: 1px solid rgba(64, 95, 88, 0.75);
-            background: #405f58;
-            color: white;
-            font-weight: 650;
-            box-shadow: 0 7px 14px rgba(64, 95, 88, 0.14);
+            border: 1px solid #cfc6b8;
+            background: #f5f1e8;
+            color: #2d2924;
+            font-weight: 600;
+            box-shadow: none;
         }
 
         .stButton > button:hover {
-            border-color: var(--primary-dark);
-            background: #2f4842;
-            color: white;
+            border-color: #9f9484;
+            background: #ebe4d7;
+            color: #2d2924;
         }
 
         [data-testid="stChatMessage"] {
@@ -175,10 +175,22 @@ st.markdown(
             padding-right: 0;
         }
 
+        [data-testid="stChatMessageAvatarAssistant"],
+        [data-testid="stChatMessageAvatarUser"] {
+            background-color: #e6dfd1 !important;
+            color: #4f5f58 !important;
+            border: 1px solid #d2c8b8;
+        }
+
+        [data-testid="stChatMessageAvatarAssistant"] svg,
+        [data-testid="stChatMessageAvatarUser"] svg {
+            fill: #4f5f58 !important;
+        }
+
         div[data-testid="stExpander"] {
             border: 1px solid var(--line);
             border-radius: 8px;
-            background: rgba(255, 253, 248, 0.8);
+            background: rgba(255, 253, 248, 0.72);
         }
 
         [data-testid="stDataFrame"] {
@@ -190,7 +202,7 @@ st.markdown(
         .help-panel {
             background: #fffdf8;
             border: 1px solid var(--line);
-            border-left: 5px solid #6f8f83;
+            border-left: 4px solid #9b9486;
             border-radius: 8px;
             padding: 1rem 1.1rem;
             margin: 0.8rem 0 1rem 0;
@@ -210,16 +222,33 @@ st.markdown(
             display: inline-block;
             margin: 0.18rem 0.25rem 0.18rem 0;
             padding: 0.32rem 0.58rem;
-            border: 1px solid #d8d0c0;
+            border: 1px solid #d6ccbc;
             border-radius: 6px;
-            background: #f6f3ed;
+            background: #fbf8f1;
             color: #4b463f;
             font-size: 0.82rem;
         }
 
         .stSelectbox div[data-baseweb="select"] > div {
             border-radius: 7px;
-            border-color: var(--line);
+            border-color: #d6ccbc;
+            background-color: #fbf8f1;
+        }
+
+        .stSelectbox div[data-baseweb="select"] * {
+            color: #2d2924;
+        }
+
+        [data-testid="stChatInput"] textarea {
+            background-color: #fbf8f1 !important;
+            border: 1px solid #d6ccbc !important;
+            color: #2d2924 !important;
+        }
+
+        [data-testid="stChatInput"] button {
+            background-color: #e6dfd1 !important;
+            color: #4f5f58 !important;
+            border: 1px solid #d2c8b8 !important;
         }
 
         @media (max-width: 760px) {
