@@ -22,8 +22,180 @@ st.set_page_config(
     layout="wide",
 )
 
-st.title("ShopCare MY")
-st.caption("Customer support chatbot for Malaysian online shoppers")
+st.markdown(
+    """
+    <style>
+        :root {
+            --primary: #0f766e;
+            --primary-dark: #115e59;
+            --accent: #f59e0b;
+            --ink: #172033;
+            --muted: #64748b;
+            --panel: #ffffff;
+            --soft: #f5f7fb;
+            --line: #dbe4ef;
+        }
+
+        .stApp {
+            background:
+                linear-gradient(180deg, #eef7f6 0%, #f7fafc 260px, #ffffff 620px);
+            color: var(--ink);
+        }
+
+        .block-container {
+            padding-top: 2rem;
+            padding-bottom: 3rem;
+            max-width: 1180px;
+        }
+
+        [data-testid="stSidebar"] {
+            background: #0f172a;
+        }
+
+        [data-testid="stSidebar"] * {
+            color: #e5eef7 !important;
+        }
+
+        [data-testid="stSidebar"] div[role="radiogroup"] label {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            margin: 0.28rem 0;
+            padding: 0.25rem 0.45rem;
+        }
+
+        .app-hero {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 1.4rem 1.6rem;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .app-hero h1 {
+            margin: 0;
+            color: #10233f;
+            font-size: 2.15rem;
+            line-height: 1.1;
+            letter-spacing: 0;
+        }
+
+        .app-hero p {
+            margin: 0.45rem 0 0 0;
+            color: var(--muted);
+            font-size: 0.98rem;
+        }
+
+        .eyebrow {
+            margin-bottom: 0.35rem !important;
+            color: var(--primary-dark) !important;
+            font-size: 0.78rem !important;
+            font-weight: 700;
+            letter-spacing: 0;
+            text-transform: uppercase;
+        }
+
+        .hero-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            justify-content: flex-end;
+            min-width: 250px;
+        }
+
+        .hero-pills span {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #bbf7d0;
+            border-radius: 999px;
+            padding: 0.38rem 0.68rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        h2, h3 {
+            color: #172033;
+            letter-spacing: 0;
+        }
+
+        [data-testid="stMetric"] {
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+        }
+
+        .stButton > button {
+            border-radius: 8px;
+            border: 1px solid #99f6e4;
+            background: var(--primary);
+            color: white;
+            font-weight: 650;
+        }
+
+        .stButton > button:hover {
+            border-color: var(--primary-dark);
+            background: var(--primary-dark);
+            color: white;
+        }
+
+        [data-testid="stChatMessage"] {
+            border-radius: 12px;
+            border: 1px solid #e5edf5;
+            background: rgba(255, 255, 255, 0.88);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+        }
+
+        div[data-testid="stExpander"] {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.78);
+        }
+
+        [data-testid="stDataFrame"] {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        @media (max-width: 760px) {
+            .app-hero {
+                display: block;
+            }
+
+            .hero-pills {
+                justify-content: flex-start;
+                margin-top: 1rem;
+            }
+        }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    """
+    <div class="app-hero">
+        <div>
+            <p class="eyebrow">Machine Learning Chatbot Prototype</p>
+            <h1>ShopCare MY</h1>
+            <p>Customer support chatbot for Malaysian online shoppers, powered by TF-IDF intent classification.</p>
+        </div>
+        <div class="hero-pills">
+            <span>Linear SVM</span>
+            <span>Logistic Regression</span>
+            <span>Feedback Analysis</span>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 page = st.sidebar.radio(
     "Menu",
@@ -32,6 +204,7 @@ page = st.sidebar.radio(
 
 if page == "Chatbot":
     st.header("Real-Time Chatbot")
+    st.caption("Type naturally or use the quick reply dropdown. Every message is still processed by the ML model.")
     model_type = st.sidebar.radio("Chatbot model", ["svm", "logistic"])
     quick_replies = {
         "Track Order": "I want to track my order",
@@ -135,6 +308,7 @@ if page == "Chatbot":
 
 elif page == "Model Evaluation":
     st.header("Model Evaluation")
+    st.caption("View the selected model's classification performance on the shared test dataset.")
     selected_model = st.selectbox("Select model", ["svm", "logistic"])
     results_dir = MODEL_RESULT_DIRS[selected_model]
     metrics_path = results_dir / f"{selected_model}_metrics.json"
@@ -158,6 +332,7 @@ elif page == "Model Evaluation":
 
 elif page == "Model Comparison":
     st.header("Model Comparison")
+    st.caption("Both models use the same dataset, preprocessing, TF-IDF settings, and train-test split.")
     rows = []
     for model_name in ["svm", "logistic"]:
         metrics_path = MODEL_RESULT_DIRS[model_name] / f"{model_name}_metrics.json"
@@ -183,6 +358,7 @@ elif page == "Model Comparison":
 
 elif page == "Feedback Records":
     st.header("Feedback Records")
+    st.caption("Saved user ratings support the chatbot usability and satisfaction evaluation.")
 
     if not FEEDBACK_PATH.exists() or FEEDBACK_PATH.stat().st_size == 0:
         st.info("No feedback records yet.")
@@ -215,6 +391,7 @@ elif page == "Feedback Records":
 
 else:
     st.header("About Project")
+    st.caption("Project scope, dataset adaptation, and individual model responsibilities.")
     st.subheader("Title")
     st.write("ShopCare MY: A Machine Learning Customer Support Chatbot for Malaysian Online Shoppers")
     st.subheader("Dataset")
