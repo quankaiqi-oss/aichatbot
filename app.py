@@ -68,14 +68,16 @@ if page == "Chatbot":
                     details += f" | Decision score: {message['confidence']:.3f}"
                 st.caption(details)
 
-    st.caption("Quick reply suggestions")
     quick_message = None
-    first_row = st.columns(4)
-    second_row = st.columns(4)
-    for index, (label, message) in enumerate(quick_replies.items()):
-        row = first_row if index < 4 else second_row
-        if row[index % 4].button(label, use_container_width=True):
-            quick_message = message
+    with st.expander("Quick reply suggestions", expanded=False):
+        col1, col2 = st.columns([3, 1])
+        selected_quick_reply = col1.selectbox(
+            "Choose a common support topic",
+            ["Select a topic"] + list(quick_replies.keys()),
+            label_visibility="collapsed",
+        )
+        if col2.button("Send", use_container_width=True) and selected_quick_reply != "Select a topic":
+            quick_message = quick_replies[selected_quick_reply]
 
     user_message = st.chat_input("Type your customer support question...")
     submitted_message = quick_message or user_message
