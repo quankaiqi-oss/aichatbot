@@ -33,6 +33,16 @@ page = st.sidebar.radio(
 if page == "Chatbot":
     st.header("Real-Time Chatbot")
     model_type = st.sidebar.radio("Chatbot model", ["svm", "logistic"])
+    quick_replies = {
+        "Track Order": "I want to track my order",
+        "Request Refund": "I want to request a refund",
+        "Payment Issue": "I have a payment issue",
+        "Delivery Help": "I need help with delivery",
+        "Account Help": "I have an account problem",
+        "Cancel Order": "I want to cancel my order",
+        "Contact Support": "I want to contact customer support",
+        "Complaint": "I want to make a complaint",
+    }
 
     if "chat_history" not in st.session_state:
         st.session_state["chat_history"] = [
@@ -58,15 +68,25 @@ if page == "Chatbot":
                     details += f" | Decision score: {message['confidence']:.3f}"
                 st.caption(details)
 
-    user_message = st.chat_input("Type your customer support question...")
+    st.caption("Quick reply suggestions")
+    quick_message = None
+    first_row = st.columns(4)
+    second_row = st.columns(4)
+    for index, (label, message) in enumerate(quick_replies.items()):
+        row = first_row if index < 4 else second_row
+        if row[index % 4].button(label, use_container_width=True):
+            quick_message = message
 
-    if user_message:
+    user_message = st.chat_input("Type your customer support question...")
+    submitted_message = quick_message or user_message
+
+    if submitted_message:
         st.session_state["chat_history"].append(
-            {"role": "user", "content": user_message}
+            {"role": "user", "content": submitted_message}
         )
 
         try:
-            result = predict_intent(user_message, model_type=model_type)
+            result = predict_intent(submitted_message, model_type=model_type)
             assistant_message = {
                 "role": "assistant",
                 "content": result["response"],
@@ -76,7 +96,7 @@ if page == "Chatbot":
                 "confidence": result["confidence"],
                 "used_fallback": result.get("used_fallback", False),
                 "fallback_reason": result.get("fallback_reason"),
-                "user_message": user_message,
+                "user_message": submitted_message,
             }
             st.session_state["chat_history"].append(assistant_message)
             st.session_state["last_prediction"] = assistant_message
