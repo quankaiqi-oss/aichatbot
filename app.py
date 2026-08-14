@@ -49,7 +49,9 @@ st.markdown(
         .block-container {
             padding-top: 2rem;
             padding-bottom: 3rem;
-            max-width: 1180px;
+            max-width: 1480px;
+            padding-left: 2.2rem;
+            padding-right: 2.2rem;
         }
 
         [data-testid="stSidebar"] {
@@ -80,10 +82,10 @@ st.markdown(
                 linear-gradient(135deg, rgba(255, 253, 248, 0.96), rgba(242, 238, 228, 0.9));
             border: 1px solid rgba(184, 174, 157, 0.55);
             border-radius: 10px;
-            padding: 1.55rem 1.75rem;
+            padding: 1rem 1.2rem;
             margin-bottom: 0.9rem;
             box-shadow:
-                0 16px 36px rgba(43, 41, 37, 0.08),
+                0 10px 24px rgba(43, 41, 37, 0.055),
                 inset 0 1px 0 rgba(255, 255, 255, 0.75);
             display: flex;
             justify-content: space-between;
@@ -94,76 +96,40 @@ st.markdown(
         .app-hero h1 {
             margin: 0;
             color: #10233f;
-            font-size: 2.15rem;
+            font-size: 1.65rem;
             line-height: 1.1;
             letter-spacing: 0;
         }
 
         .app-hero p {
-            margin: 0.45rem 0 0 0;
+            margin: 0.32rem 0 0 0;
             color: var(--muted);
-            font-size: 0.98rem;
+            font-size: 0.9rem;
         }
 
         .eyebrow {
-            margin-bottom: 0.35rem !important;
+            margin-bottom: 0.25rem !important;
             color: #87633a !important;
-            font-size: 0.78rem !important;
+            font-size: 0.72rem !important;
             font-weight: 700;
             letter-spacing: 0;
             text-transform: uppercase;
         }
 
-        .hero-pills {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.45rem;
-            justify-content: flex-end;
-            min-width: 250px;
-        }
-
-        .hero-pills span {
-            background: rgba(255, 253, 248, 0.86);
-            color: #405f58;
-            border: 1px solid rgba(111, 143, 131, 0.24);
-            border-radius: 6px;
-            padding: 0.38rem 0.68rem;
-            font-size: 0.82rem;
-            font-weight: 600;
-        }
-
-        .instax-card {
-            width: 172px;
-            min-width: 172px;
+        .logo-mark {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            border-radius: 7px;
             background: #fffefb;
-            border: 1px solid #e7dfd0;
-            border-radius: 5px;
-            padding: 0.55rem 0.55rem 1.15rem 0.55rem;
-            box-shadow: 0 14px 24px rgba(43, 41, 37, 0.12);
-            transform: rotate(1.4deg);
-        }
-
-        .instax-frame {
-            height: 112px;
-            border-radius: 3px;
-            background:
-                linear-gradient(135deg, rgba(111, 143, 131, 0.9), rgba(64, 95, 88, 0.94)),
-                linear-gradient(45deg, transparent 45%, rgba(255, 255, 255, 0.16) 45% 55%, transparent 55%);
+            border: 1px solid #ded8ca;
+            box-shadow: 0 8px 14px rgba(43, 41, 37, 0.08);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #fffdf8;
-            font-weight: 700;
-            font-size: 0.9rem;
-            text-align: center;
-        }
-
-        .instax-caption {
-            margin: 0.55rem 0 0 0;
-            color: #6c655c;
-            font-size: 0.76rem;
-            text-align: center;
-            font-weight: 600;
+            color: #405f58;
+            font-weight: 800;
+            font-size: 0.95rem;
         }
 
         .status-strip {
@@ -280,16 +246,6 @@ st.markdown(
                 display: block;
             }
 
-            .hero-pills {
-                justify-content: flex-start;
-                margin-top: 1rem;
-            }
-
-            .instax-card {
-                margin-top: 1rem;
-                transform: rotate(0deg);
-            }
-
             .status-strip {
                 grid-template-columns: 1fr 1fr;
             }
@@ -306,16 +262,8 @@ st.markdown(
             <p class="eyebrow">Machine Learning Chatbot Prototype</p>
             <h1>ShopCare MY</h1>
             <p>Customer support chatbot for Malaysian online shoppers, powered by TF-IDF intent classification.</p>
-            <div class="hero-pills">
-                <span>Linear SVM</span>
-                <span>Logistic Regression</span>
-                <span>Feedback Analysis</span>
-            </div>
         </div>
-        <div class="instax-card">
-            <div class="instax-frame">Intent<br>Support<br>Assistant</div>
-            <p class="instax-caption">ShopCare MY / 2026</p>
-        </div>
+        <div class="logo-mark">SC</div>
     </div>
     """,
     unsafe_allow_html=True,
