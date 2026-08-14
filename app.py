@@ -27,18 +27,21 @@ st.markdown(
     <style>
         :root {
             --primary: #0f766e;
-            --primary-dark: #115e59;
-            --accent: #f59e0b;
-            --ink: #172033;
-            --muted: #64748b;
+            --primary-dark: #0f4f4a;
+            --accent: #c08a2c;
+            --ink: #111827;
+            --muted: #65758b;
             --panel: #ffffff;
-            --soft: #f5f7fb;
-            --line: #dbe4ef;
+            --soft: #f6f8fb;
+            --line: #d8e0ea;
+            --navy: #101827;
+            --navy-soft: #1f2a3d;
         }
 
         .stApp {
             background:
-                linear-gradient(180deg, #eef7f6 0%, #f7fafc 260px, #ffffff 620px);
+                radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 34rem),
+                linear-gradient(180deg, #f4f8f7 0%, #f7f9fc 300px, #ffffff 720px);
             color: var(--ink);
         }
 
@@ -49,7 +52,7 @@ st.markdown(
         }
 
         [data-testid="stSidebar"] {
-            background: #0f172a;
+            background: linear-gradient(180deg, #0b1220 0%, #111827 100%);
         }
 
         [data-testid="stSidebar"] * {
@@ -57,20 +60,29 @@ st.markdown(
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.055);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            border-radius: 10px;
             margin: 0.28rem 0;
-            padding: 0.25rem 0.45rem;
+            padding: 0.32rem 0.5rem;
+            transition: all 120ms ease;
+        }
+
+        [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
+            background: rgba(15, 118, 110, 0.22);
+            border-color: rgba(153, 246, 228, 0.35);
         }
 
         .app-hero {
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            padding: 1.4rem 1.6rem;
-            margin-bottom: 1.25rem;
-            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+            background:
+                linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.9));
+            border: 1px solid rgba(216, 224, 234, 0.9);
+            border-radius: 18px;
+            padding: 1.55rem 1.75rem;
+            margin-bottom: 0.9rem;
+            box-shadow:
+                0 24px 60px rgba(15, 23, 42, 0.09),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
             display: flex;
             justify-content: space-between;
             gap: 1rem;
@@ -93,7 +105,7 @@ st.markdown(
 
         .eyebrow {
             margin-bottom: 0.35rem !important;
-            color: var(--primary-dark) !important;
+            color: var(--accent) !important;
             font-size: 0.78rem !important;
             font-weight: 700;
             letter-spacing: 0;
@@ -109,13 +121,49 @@ st.markdown(
         }
 
         .hero-pills span {
-            background: #ecfdf5;
-            color: #065f46;
-            border: 1px solid #bbf7d0;
+            background: rgba(15, 118, 110, 0.08);
+            color: #0f4f4a;
+            border: 1px solid rgba(15, 118, 110, 0.18);
             border-radius: 999px;
             padding: 0.38rem 0.68rem;
             font-size: 0.82rem;
             font-weight: 600;
+        }
+
+        .status-strip {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .status-card {
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(216, 224, 234, 0.9);
+            border-radius: 14px;
+            padding: 0.8rem 0.9rem;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.045);
+        }
+
+        .status-card small {
+            display: block;
+            color: var(--muted);
+            font-size: 0.72rem;
+            margin-bottom: 0.22rem;
+        }
+
+        .status-card strong {
+            color: #10233f;
+            font-size: 0.95rem;
+        }
+
+        .section-panel {
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(216, 224, 234, 0.92);
+            border-radius: 16px;
+            padding: 1.05rem 1.15rem;
+            margin: 0.9rem 0 1rem 0;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.055);
         }
 
         h2, h3 {
@@ -126,22 +174,23 @@ st.markdown(
         [data-testid="stMetric"] {
             background: rgba(255, 255, 255, 0.88);
             border: 1px solid var(--line);
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 1rem;
-            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.055);
         }
 
         .stButton > button {
-            border-radius: 8px;
-            border: 1px solid #99f6e4;
-            background: var(--primary);
+            border-radius: 10px;
+            border: 1px solid rgba(15, 118, 110, 0.8);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             font-weight: 650;
+            box-shadow: 0 8px 18px rgba(15, 118, 110, 0.18);
         }
 
         .stButton > button:hover {
             border-color: var(--primary-dark);
-            background: var(--primary-dark);
+            background: linear-gradient(135deg, var(--primary-dark), #0b3f3b);
             color: white;
         }
 
@@ -149,7 +198,7 @@ st.markdown(
             border-radius: 12px;
             border: 1px solid #e5edf5;
             background: rgba(255, 255, 255, 0.88);
-            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.045);
         }
 
         div[data-testid="stExpander"] {
@@ -167,11 +216,11 @@ st.markdown(
         .help-panel {
             background: #ffffff;
             border: 1px solid var(--line);
-            border-left: 5px solid var(--primary);
-            border-radius: 12px;
+            border-left: 5px solid var(--accent);
+            border-radius: 14px;
             padding: 1rem 1.1rem;
             margin: 0.8rem 0 1rem 0;
-            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.045);
         }
 
         .help-panel strong {
@@ -194,6 +243,11 @@ st.markdown(
             font-size: 0.82rem;
         }
 
+        .stSelectbox div[data-baseweb="select"] > div {
+            border-radius: 10px;
+            border-color: var(--line);
+        }
+
         @media (max-width: 760px) {
             .app-hero {
                 display: block;
@@ -202,6 +256,10 @@ st.markdown(
             .hero-pills {
                 justify-content: flex-start;
                 margin-top: 1rem;
+            }
+
+            .status-strip {
+                grid-template-columns: 1fr 1fr;
             }
         }
     </style>
@@ -222,6 +280,18 @@ st.markdown(
             <span>Logistic Regression</span>
             <span>Feedback Analysis</span>
         </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    """
+    <div class="status-strip">
+        <div class="status-card"><small>Prototype Type</small><strong>ML Chatbot</strong></div>
+        <div class="status-card"><small>KaiQi Module</small><strong>TF-IDF + Linear SVM</strong></div>
+        <div class="status-card"><small>Kathy Module</small><strong>TF-IDF + Logistic Regression</strong></div>
+        <div class="status-card"><small>Evaluation</small><strong>Accuracy, F1, Feedback</strong></div>
     </div>
     """,
     unsafe_allow_html=True,
@@ -265,6 +335,7 @@ if page == "Chatbot":
         """,
         unsafe_allow_html=True,
     )
+    st.markdown('<div class="section-panel">', unsafe_allow_html=True)
 
     if "chat_history" not in st.session_state:
         st.session_state["chat_history"] = [
@@ -355,10 +426,12 @@ if page == "Chatbot":
                             ]
                         )
                     st.success("Feedback saved.")
+    st.markdown("</div>", unsafe_allow_html=True)
 
 elif page == "Model Evaluation":
     st.header("Model Evaluation")
     st.caption("View how well each model predicts customer support intents on the shared test dataset.")
+    st.markdown('<div class="section-panel">', unsafe_allow_html=True)
     selected_label = st.selectbox("Select model", ["KaiQi SVM", "Kathy Logistic Regression"])
     selected_model = "svm" if selected_label == "KaiQi SVM" else "logistic"
     results_dir = MODEL_RESULT_DIRS[selected_model]
@@ -382,10 +455,12 @@ elif page == "Model Evaluation":
             st.dataframe(pd.read_csv(report_path), use_container_width=True)
     else:
         st.info("Evaluation results are not generated yet.")
+    st.markdown("</div>", unsafe_allow_html=True)
 
 elif page == "Model Comparison":
     st.header("Model Comparison")
     st.caption("Both models use the same dataset, preprocessing, TF-IDF settings, and train-test split for fair comparison.")
+    st.markdown('<div class="section-panel">', unsafe_allow_html=True)
     rows = []
     for model_name in ["svm", "logistic"]:
         metrics_path = MODEL_RESULT_DIRS[model_name] / f"{model_name}_metrics.json"
@@ -410,10 +485,12 @@ elif page == "Model Comparison":
         st.bar_chart(comparison_df.set_index("Model")[["Accuracy", "Precision", "Recall", "F1 Score"]])
     else:
         st.info("Comparison results are not generated yet.")
+    st.markdown("</div>", unsafe_allow_html=True)
 
 elif page == "Feedback Records":
     st.header("Feedback Records")
     st.caption("Saved user ratings support the chatbot usability and satisfaction evaluation.")
+    st.markdown('<div class="section-panel">', unsafe_allow_html=True)
 
     if not FEEDBACK_PATH.exists() or FEEDBACK_PATH.stat().st_size == 0:
         st.info("No feedback records yet.")
@@ -443,10 +520,12 @@ elif page == "Feedback Records":
             )
             st.subheader("Feedback By Intent")
             st.dataframe(intent_summary, use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
 else:
     st.header("About Project")
     st.caption("Project scope, dataset adaptation, and individual model responsibilities.")
+    st.markdown('<div class="section-panel">', unsafe_allow_html=True)
     st.subheader("Title")
     st.write("ShopCare MY: A Machine Learning Customer Support Chatbot for Malaysian Online Shoppers")
     st.subheader("Dataset")
@@ -457,3 +536,4 @@ else:
     st.subheader("Methods")
     st.write("SVM module: TF-IDF + Linear SVM")
     st.write("Comparison module: TF-IDF + Logistic Regression")
+    st.markdown("</div>", unsafe_allow_html=True)
