@@ -52,8 +52,8 @@ st.markdown(
 
         .stApp {
             background:
-                linear-gradient(90deg, rgba(92, 68, 68, 0.028) 1px, transparent 1px),
-                linear-gradient(180deg, #f6f1e3 0%, #fbfaf5 420px, #ffffff 100%);
+                linear-gradient(90deg, rgba(92, 68, 68, 0.045) 1px, transparent 1px),
+                linear-gradient(180deg, #EDE7D5 0%, #f8f4e8 420px, #ffffff 100%);
             background-size: 32px 32px, auto;
             color: var(--ink);
         }
@@ -67,12 +67,12 @@ st.markdown(
         }
 
         [data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #EDE7D5 0%, #fbfaf5 100%);
-            border-right: 1px solid #d8d2c3;
+            background: #5C4444;
+            border-right: 1px solid #463333;
         }
 
         [data-testid="stSidebar"] * {
-            color: #5C4444 !important;
+            color: #ffffff !important;
         }
 
         [data-testid="stSidebar"] > div:first-child {
@@ -95,13 +95,13 @@ st.markdown(
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
-            background: rgba(180, 207, 203, 0.42) !important;
-            border-left-color: #5C4444 !important;
+            background: rgba(180, 207, 203, 0.24) !important;
+            border-left-color: #b4cfcb !important;
             box-shadow: none;
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) * {
-            color: #5C4444 !important;
+            color: #ffffff !important;
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) div[data-testid="stMarkdownContainer"] p {
@@ -109,8 +109,8 @@ st.markdown(
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
-            background: rgba(180, 207, 203, 0.28) !important;
-            border-left-color: rgba(92, 68, 68, 0.35) !important;
+            background: rgba(180, 207, 203, 0.16) !important;
+            border-left-color: rgba(180, 207, 203, 0.7) !important;
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label > div:first-child {
@@ -125,19 +125,19 @@ st.markdown(
 
         .app-hero {
             background:
-                linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(237, 231, 213, 0.72));
-            border: 1px solid rgba(216, 210, 195, 0.95);
+                linear-gradient(135deg, #5C4444 0%, #5C4444 68%, #6d5353 100%);
+            border: 1px solid rgba(70, 51, 51, 0.95);
             border-radius: 8px;
             padding: 1.05rem 1.15rem;
             margin-bottom: 1.1rem;
             box-shadow:
-                0 8px 22px rgba(92, 68, 68, 0.05),
-                inset 0 1px 0 rgba(255, 255, 255, 0.75);
+                0 10px 24px rgba(92, 68, 68, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.12);
         }
 
         .app-hero h1 {
             margin: 0;
-            color: #5C4444;
+            color: #ffffff;
             font-family: "Segoe UI", Arial, sans-serif;
             font-size: 1.72rem;
             font-weight: 800;
@@ -147,13 +147,13 @@ st.markdown(
 
         .app-hero p {
             margin: 0.42rem 0 0 0;
-            color: var(--muted);
+            color: rgba(255, 255, 255, 0.84);
             font-size: 0.9rem;
         }
 
         .eyebrow {
             margin-bottom: 0.34rem !important;
-            color: #5C4444 !important;
+            color: #b4cfcb !important;
             font-size: 0.7rem !important;
             font-weight: 700;
             letter-spacing: 0;
@@ -240,7 +240,7 @@ st.markdown(
             border-radius: 8px;
             background: #b4cfcb;
             border: 1px solid #a4c3be;
-            color: #5C4444;
+            color: #000000;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -268,8 +268,9 @@ st.markdown(
         }
 
         .chat-row.user .chat-bubble {
-            background: #EDE7D5;
-            border-color: #d8d2c3;
+            background: #b4cfcb;
+            border-color: #a4c3be;
+            color: #000000;
             max-width: min(620px, 58%);
         }
 
