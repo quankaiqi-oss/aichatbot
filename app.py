@@ -410,8 +410,12 @@ if page == "Chatbot":
             {
                 "role": "assistant",
                 "content": (
-                    "Hi, I am ShopCare MY. Tell me what happened with your order, "
-                    "payment, refund, delivery, or account."
+                    "Hi, I am ShopCare MY. I can assist with online shopping support issues.\n\n"
+                    "You may ask about:\n"
+                    "- Order tracking or delivery delay\n"
+                    "- Refunds, returns, or damaged items\n"
+                    "- Payment, account, voucher, or complaint issues\n\n"
+                    "What issue would you like help with?"
                 ),
             }
         ]
@@ -451,9 +455,8 @@ if page == "Chatbot":
         suggestions = st.session_state["last_prediction"].get("follow_up_options", [])
         if suggestions:
             st.caption("Continue with")
-            suggestion_cols = st.columns([1, 1, 1, 4][: len(suggestions)])
             for index, suggestion in enumerate(suggestions[:4]):
-                if suggestion_cols[index].button(suggestion, key=f"suggestion_{index}"):
+                if st.button(suggestion, key=f"suggestion_{index}"):
                     suggested_message = suggestion
 
     user_message = st.chat_input("Type your customer support question...")

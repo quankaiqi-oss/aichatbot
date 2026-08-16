@@ -23,13 +23,27 @@ FALLBACK_RESPONSE = (
 )
 
 CLARIFICATION_RESPONSE = (
-    "I can help, but I need one more detail first. Which area is the problem related to?"
+    "I can assist you, but I need one more detail before giving the correct guidance.\n\n"
+    "Please choose the issue category:\n"
+    "- Order tracking or delivery delay\n"
+    "- Refund or return request\n"
+    "- Payment issue\n"
+    "- Account login problem\n"
+    "- Cancellation or customer support\n\n"
+    "Which issue would you like help with?"
 )
 
 CONVERSATIONAL_RESPONSES = {
-    "greeting": "Hi, I am ShopCare MY. Tell me what happened and I will try to guide you.",
-    "thanks": "You are welcome. Hope the steps help.",
-    "goodbye": "Thanks for chatting with ShopCare MY. Hope everything gets sorted soon.",
+    "greeting": (
+        "Hi, I am ShopCare MY. I can assist with common online shopping support issues.\n\n"
+        "You may ask about:\n"
+        "- Order tracking and delivery delay\n"
+        "- Refunds, returns, or damaged items\n"
+        "- Payment, account, voucher, or complaint issues\n\n"
+        "What issue would you like help with?"
+    ),
+    "thanks": "You are welcome. Would you like help with anything else?",
+    "goodbye": "Thank you for using ShopCare MY. I hope your issue is resolved soon.",
     "capability": (
         "I can help with order tracking, refunds, payment issues, delivery delays, "
         "cancellations, account access, vouchers, invoices, complaints, and contacting support."
@@ -114,33 +128,50 @@ FOLLOW_UP_OPTIONS = {
 
 INTENT_RESPONSES = {
     "track_order": (
-        "Sure. Open My Orders, select the order, then check the delivery status and tracking "
-        "number. If it is already late, prepare your order number before contacting support."
+        "To track your order, please follow these steps:\n\n"
+        "- Open the My Orders section in your account.\n"
+        "- Select the order that you want to check.\n"
+        "- Review the delivery status and tracking number.\n"
+        "- If the parcel is delayed, prepare your order number before contacting support."
     ),
     "track_refund": (
-        "You can check the refund status from the refund or return section in your account. "
-        "If there is no update, prepare your order number, refund request date, and payment method."
+        "To check your refund status, please follow these steps:\n\n"
+        "- Open the refund or return section in your account.\n"
+        "- Check whether the refund request is still processing or already approved.\n"
+        "- Prepare your order number, refund request date, and payment method if support is needed."
     ),
     "get_refund": (
-        "Sure, I can help with that. Open My Orders, choose the item, then select Refund or "
-        "Return. Submit the reason and upload proof if needed."
+        "To request a refund, please follow these steps:\n\n"
+        "- Open My Orders and select the affected item.\n"
+        "- Choose the Refund or Return option.\n"
+        "- Provide a clear reason for the refund request.\n"
+        "- Upload supporting proof if needed, such as photos for damaged or wrong items."
     ),
     "cancel_order": (
-        "Go to My Orders, choose the order, and select Cancel if the option is still available. "
-        "If it has already shipped, you may need to request a return or contact support."
+        "To cancel an order, please check the order status first:\n\n"
+        "- Open My Orders and select the order.\n"
+        "- Choose Cancel if the cancellation option is still available.\n"
+        "- If the order has already shipped, you may need to request a return or contact support."
     ),
     "payment_issue": (
-        "Please check two things first: whether the amount was deducted and whether the "
-        "order was created. If money was deducted but no order appears, contact support "
-        "with your transaction reference."
+        "For payment issues, please check the following:\n\n"
+        "- Confirm whether the payment amount was deducted.\n"
+        "- Check whether the order was successfully created.\n"
+        "- If payment was deducted but no order appears, contact support with your transaction reference."
     ),
     "recover_password": (
-        "Use Forgot Password on the login page. Enter your registered email or phone number, "
-        "then follow the reset instructions."
+        "To recover your password, please follow these steps:\n\n"
+        "- Go to the login page.\n"
+        "- Select Forgot Password.\n"
+        "- Enter your registered email or phone number.\n"
+        "- Follow the reset instructions sent to you."
     ),
     "complaint": (
-        "Please describe what happened and include your order number if available. The support "
-        "team can review the case and assist you further."
+        "To submit a complaint, please prepare the following details:\n\n"
+        "- A short explanation of what happened.\n"
+        "- Your order number, if available.\n"
+        "- Screenshots or proof related to the issue.\n"
+        "- Any previous communication with the seller or support team."
     ),
     "delivery_period": (
         "Delivery time depends on the courier, seller processing time, and your location. "
@@ -421,6 +452,8 @@ def format_response(response: str) -> str:
 def build_response(intent: str, response: str) -> str:
     if intent in EMPATHY_PREFIXES:
         response = EMPATHY_PREFIXES[intent] + response
+    if FOLLOW_UP_OPTIONS.get(intent):
+        response = response + "\n\nWould you like to continue with one of the options below?"
     return response
 
 
