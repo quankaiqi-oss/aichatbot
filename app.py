@@ -59,11 +59,11 @@ st.markdown(
         }
 
         .block-container {
-            padding-top: 2rem;
+            padding-top: 2.2rem;
             padding-bottom: 3rem;
-            max-width: 1220px;
-            padding-left: 2.2rem;
-            padding-right: 2.2rem;
+            max-width: 1360px;
+            padding-left: 3rem;
+            padding-right: 3rem;
         }
 
         [data-testid="stSidebar"] {
@@ -129,9 +129,9 @@ st.markdown(
             border: 1px solid rgba(70, 51, 51, 0.95);
             border-left: 7px solid #b4cfcb;
             border-radius: 10px;
-            padding: 1rem 1.15rem;
-            margin-bottom: 1.4rem;
-            max-width: 920px;
+            padding: 1.15rem 1.35rem;
+            margin-bottom: 1.65rem;
+            max-width: 1080px;
             box-shadow:
                 0 10px 24px rgba(92, 68, 68, 0.12),
                 inset 0 1px 0 rgba(255, 255, 255, 0.12);
@@ -223,8 +223,8 @@ st.markdown(
             display: flex;
             gap: 0.65rem;
             align-items: flex-start;
-            margin: 0.85rem 0;
-            width: min(820px, 100%);
+            margin: 1.15rem 0;
+            width: min(1040px, 100%);
         }
 
         .chat-row.user {
@@ -254,11 +254,11 @@ st.markdown(
         .chat-bubble {
             display: inline-block;
             width: fit-content;
-            max-width: min(640px, 78%);
-            padding: 0.82rem 0.95rem;
+            max-width: min(760px, 76%);
+            padding: 0.95rem 1.08rem;
             border-radius: 10px;
             border: 1px solid #d8d2c3;
-            line-height: 1.48;
+            line-height: 1.58;
             box-shadow: 0 6px 16px rgba(92, 68, 68, 0.032);
             overflow-wrap: anywhere;
             white-space: pre-wrap;
@@ -273,7 +273,7 @@ st.markdown(
             background: #b4cfcb;
             border-color: #a4c3be;
             color: #000000;
-            max-width: min(560px, 66%);
+            max-width: min(640px, 64%);
         }
 
         .quick-reply-title {
@@ -362,7 +362,7 @@ st.markdown(
             min-height: 66px !important;
             padding: 0.35rem 0.45rem !important;
             box-shadow: 0 8px 20px rgba(92, 68, 68, 0.045) !important;
-            max-width: 920px !important;
+            max-width: 1080px !important;
         }
 
         [data-testid="stChatInput"] > div:focus-within {
