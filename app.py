@@ -60,13 +60,23 @@ def load_metrics_table() -> pd.DataFrame:
 
 def interactive_metric_chart(chart_df: pd.DataFrame, title: str):
     long_df = chart_df.melt(id_vars="Model", var_name="Metric", value_name="Score")
-    min_score = max(0.0, float(long_df["Score"].min()) - 0.003)
     nearest = alt.selection_point(nearest=True, on="pointerover", fields=["Model", "Metric"], empty=False)
     base = (
         alt.Chart(long_df)
         .encode(
-            x=alt.X("Metric:N", title=None, sort=["Accuracy", "Precision", "Recall", "F1 Score"]),
-            y=alt.Y("Score:Q", scale=alt.Scale(domain=[min_score, 1.002]), title="Score"),
+            x=alt.X(
+                "Metric:N",
+                title=None,
+                sort=["Accuracy", "Precision", "Recall", "F1 Score"],
+                axis=alt.Axis(labelAngle=0),
+            ),
+            y=alt.Y(
+                "Score:Q",
+                scale=alt.Scale(domain=[0, 1.05]),
+                title="Score",
+                axis=alt.Axis(grid=True, gridColor="#EDE7D5"),
+            ),
+            xOffset=alt.XOffset("Model:N"),
             color=alt.Color(
                 "Model:N",
                 scale=alt.Scale(range=["#5C4444", "#b4cfcb", "#8f7676"]),
@@ -78,12 +88,15 @@ def interactive_metric_chart(chart_df: pd.DataFrame, title: str):
                 alt.Tooltip("Score:Q", format=".4f"),
             ],
         )
-        .properties(height=330, title=title)
+        .properties(height=320, title=alt.TitleParams(text=title, color="#5C4444", fontSize=15))
     )
-    lines = base.mark_line(point=True, strokeWidth=3)
-    points = base.mark_circle(size=90).encode(opacity=alt.condition(nearest, alt.value(1), alt.value(0)))
-    rules = base.mark_rule(color="#d8d2c3").encode(opacity=alt.condition(nearest, alt.value(0.45), alt.value(0)))
-    return (lines + points + rules).interactive()
+    bars = base.mark_bar(cornerRadiusTopLeft=5, cornerRadiusTopRight=5)
+    points = base.mark_circle(size=100).encode(opacity=alt.condition(nearest, alt.value(1), alt.value(0)))
+    return (bars + points).configure_axis(
+        labelColor="#5C4444",
+        titleColor="#5C4444",
+        gridColor="#EDE7D5",
+    ).configure_view(stroke=None)
 
 
 def interactive_single_metric_chart(summary_df: pd.DataFrame, title: str):
@@ -133,10 +146,10 @@ def interactive_speed_chart(speed_df: pd.DataFrame):
     )
     chart = (
         alt.Chart(long_df)
-        .mark_bar(cornerRadiusTopRight=6, cornerRadiusBottomRight=6)
+        .mark_bar(cornerRadiusTopRight=6, cornerRadiusBottomRight=6, height=24)
         .encode(
-            y=alt.Y("Model:N", sort="-x", title=None),
-            x=alt.X("Value:Q", title=None),
+            y=alt.Y("Model:N", sort="x", title=None, axis=alt.Axis(labelLimit=170)),
+            x=alt.X("Value:Q", title=None, axis=alt.Axis(grid=True, gridColor="#EDE7D5")),
             color=alt.Color("Model:N", scale=alt.Scale(range=["#5C4444", "#b4cfcb"]), legend=None),
             tooltip=[
                 alt.Tooltip("Model:N"),
@@ -145,9 +158,10 @@ def interactive_speed_chart(speed_df: pd.DataFrame):
             ],
         )
         .properties(height=150)
-        .facet(column=alt.Column("Metric:N", title=None))
+        .facet(column=alt.Column("Metric:N", title=None, header=alt.Header(labelColor="#5C4444", labelFontSize=12)))
         .resolve_scale(x="independent")
-        .interactive()
+        .configure_axis(labelColor="#5C4444", titleColor="#5C4444")
+        .configure_view(stroke=None)
     )
     return chart
 
@@ -316,12 +330,44 @@ st.markdown(
             letter-spacing: 0;
         }
 
+        h1 {
+            color: #5C4444 !important;
+            font-size: 1.9rem !important;
+            line-height: 1.18 !important;
+            margin-bottom: 0.8rem !important;
+        }
+
+        h2 {
+            font-size: 1.28rem !important;
+            line-height: 1.25 !important;
+        }
+
+        h3 {
+            font-size: 1.02rem !important;
+            line-height: 1.25 !important;
+        }
+
         [data-testid="stMetric"] {
             background: rgba(255, 255, 255, 0.94);
             border: 1px solid var(--line);
             border-radius: 8px;
-            padding: 1rem;
+            padding: 0.82rem 0.95rem;
             box-shadow: 0 9px 20px rgba(92, 68, 68, 0.04);
+        }
+
+        [data-testid="stMetricLabel"] {
+            color: #5C4444;
+            font-size: 0.82rem;
+        }
+
+        [data-testid="stMetricValue"] {
+            color: #172033;
+            font-size: 1.55rem;
+            line-height: 1.15;
+        }
+
+        [data-testid="stMetricDelta"] {
+            font-size: 0.78rem;
         }
 
         .stButton > button {
@@ -563,6 +609,10 @@ st.markdown(
             border-radius: 7px;
             border-color: #d8d2c3;
             background-color: #ffffff;
+        }
+
+        .stSelectbox {
+            max-width: 720px;
         }
 
         .stSelectbox div[data-baseweb="select"] * {
@@ -871,17 +921,16 @@ elif page == "Model Evaluation":
             }
         )
 
-        top1, top2, top3, top4 = st.columns(4)
-        top1.metric("Model", selected_label)
-        top2.metric("Accuracy", f"{metrics['accuracy']:.4f}")
-        top3.metric("F1 Score", f"{metrics['f1_score']:.4f}")
-        top4.metric("Avg Prediction", f"{metrics.get('average_prediction_time_ms', 0):.6f} ms")
+        top1, top2, top3 = st.columns(3)
+        top1.metric("Accuracy", f"{metrics['accuracy']:.4f}", selected_label)
+        top2.metric("F1 Score", f"{metrics['f1_score']:.4f}", "Intent balance")
+        top3.metric("Avg Prediction", f"{metrics.get('average_prediction_time_ms', 0):.6f} ms", "Per message")
 
         st.divider()
 
         with st.container(border=True):
             st.subheader("Performance Overview")
-            st.caption("Interactive chart. Hover for values, drag or scroll to move/zoom.")
+            st.caption("Hover over a bar to inspect the exact score.")
             st.altair_chart(
                 interactive_single_metric_chart(summary_df, f"{selected_label} Metrics"),
                 use_container_width=True,
@@ -950,8 +999,8 @@ elif page == "Model Comparison":
 
         with chart_tab:
             with st.container(border=True):
-                st.subheader("Interactive Classification Comparison")
-                st.caption("Hover for values, drag or scroll to move/zoom.")
+                st.subheader("Classification Comparison")
+                st.caption("Hover over a bar to inspect the exact score.")
                 metric_chart_df = comparison_df[["Model", "Accuracy", "Precision", "Recall", "F1 Score"]]
                 st.altair_chart(
                     interactive_metric_chart(metric_chart_df, "Classification Metrics"),
@@ -996,7 +1045,7 @@ elif page == "Model Comparison":
                     },
                 )
             with speed_chart_col:
-                st.caption("Interactive chart. Hover for values, drag or scroll to move/zoom.")
+                st.caption("Hover over a bar to inspect the exact timing.")
                 st.altair_chart(interactive_speed_chart(comparison_df), use_container_width=True)
     else:
         st.info("Comparison results are not generated yet.")
