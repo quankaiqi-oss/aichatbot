@@ -17,9 +17,13 @@ SVM_CONFIDENCE_THRESHOLD = 0.15
 LOGISTIC_CONFIDENCE_THRESHOLD = 0.40
 
 FALLBACK_RESPONSE = (
-    "I am not confident I understood your request. Please type a clearer topic "
-    "such as order tracking, refund, payment issue, delivery, account problem, "
-    "or complaint."
+    "I am not confident I understood your request. Is your issue about order tracking, "
+    "refund, payment, delivery, account access, cancellation, or customer service?"
+)
+
+CLARIFICATION_RESPONSE = (
+    "I can help, but I need one more detail. Is your issue about delivery delay, "
+    "order tracking, refund, cancellation, payment, account login, or contacting support?"
 )
 
 INTENT_RESPONSES = {
@@ -57,28 +61,205 @@ INTENT_RESPONSES = {
         "I am sorry about the issue. Please describe what happened and include your order "
         "number if available. The support team can then review the case and assist you further."
     ),
+    "delivery_period": (
+        "Delivery time depends on the courier, seller processing time, and your location. "
+        "Please check the estimated delivery date in My Orders. If it has passed, contact "
+        "support with your order number."
+    ),
+    "delivery_options": (
+        "Available delivery options are usually shown during checkout. You can compare courier "
+        "choices, delivery fees, and estimated arrival dates before confirming the order."
+    ),
+    "change_shipping_address": (
+        "To change the shipping address, open your order details and check whether address "
+        "editing is still available. If the order has already shipped, contact customer support "
+        "as soon as possible."
+    ),
+    "check_refund_policy": (
+        "Refund eligibility depends on the item condition, return period, seller policy, and "
+        "reason for refund. Please check the refund policy in the order or help centre before "
+        "submitting your request."
+    ),
+    "contact_customer_service": (
+        "You can contact customer support through the help centre, live chat, or support form. "
+        "Prepare your order number, screenshots, and a short explanation of the issue."
+    ),
+    "contact_human_agent": (
+        "I can guide you first, but if you need a human agent, open the help centre and choose "
+        "live chat or submit a support ticket with your order details."
+    ),
+    "check_payment_methods": (
+        "You can check available payment methods during checkout. Common options include card, "
+        "online banking, e-wallet, and vouchers, depending on the platform."
+    ),
+    "check_invoice": (
+        "You can check the invoice from your order details or purchase history. If it is not "
+        "available, contact support and provide the order number."
+    ),
+    "get_invoice": (
+        "To get an invoice, open My Orders, select the completed order, and look for the invoice "
+        "or receipt option. Download it from there if available."
+    ),
+    "create_account": (
+        "To create an account, choose Sign Up, enter your email or phone number, verify it, and "
+        "set a secure password."
+    ),
+    "registration_problems": (
+        "For registration problems, check whether your email or phone number is already used, "
+        "then request a new verification code. If it still fails, contact support."
+    ),
+    "edit_account": (
+        "To update account details, open account settings or profile settings, edit the relevant "
+        "information, and save the changes."
+    ),
+    "delete_account": (
+        "To delete your account, go to account settings and look for account deletion or privacy "
+        "options. Make sure you resolve active orders, refunds, and wallet balances first."
+    ),
+    "place_order": (
+        "To place an order, add the item to cart, confirm the shipping address, choose payment "
+        "method, apply vouchers if needed, and submit the order."
+    ),
+    "change_order": (
+        "To change an order, open the order details and check whether editing is still allowed. "
+        "If the order is already processed, you may need to cancel it or contact support."
+    ),
+    "check_cancellation_fee": (
+        "Cancellation fees depend on the platform policy, seller status, and whether the order "
+        "has already been processed or shipped. Check the cancellation details before confirming."
+    ),
+    "review": (
+        "You can leave a product review from your completed order page. Share clear feedback "
+        "about item quality, delivery, and seller service."
+    ),
+    "newsletter_subscription": (
+        "You can manage newsletter or promotional messages from notification settings, email "
+        "preferences, or account settings."
+    ),
+    "switch_account": (
+        "To switch account, log out from the current account and log in using the other email, "
+        "phone number, or linked login method."
+    ),
+    "damaged_item": (
+        "If the item arrived damaged, take clear photos or videos, keep the packaging, and open "
+        "a return or refund request from the order page. Include the evidence when submitting."
+    ),
+    "wrong_item": (
+        "If you received the wrong item, take photos of the parcel and product, then request a "
+        "return or refund from the order page. Include your order number and evidence."
+    ),
+    "voucher_issue": (
+        "For voucher issues, check the voucher expiry date, minimum spend, selected products, "
+        "payment method, and whether it has already been used."
+    ),
 }
 
 
 def rule_based_intent(cleaned_text: str) -> str | None:
+    vague_problem_words = ["problem", "issue", "help", "cannot", "cant", "tak boleh", "error"]
+    has_only_vague_problem = (
+        any(word in cleaned_text for word in vague_problem_words)
+        and not any(
+            word in cleaned_text
+            for word in [
+                "order",
+                "parcel",
+                "package",
+                "delivery",
+                "refund",
+                "payment",
+                "paid",
+                "cancel",
+                "password",
+                "login",
+                "account",
+                "address",
+                "invoice",
+                "voucher",
+                "damaged",
+                "wrong",
+                "seller",
+                "support",
+            ]
+        )
+    )
+    if has_only_vague_problem:
+        return "clarify"
+
     has_tracking_word = any(
         word in cleaned_text
-        for word in ["track", "tracking", "status", "where", "parcel", "package", "shipment"]
+        for word in [
+            "track",
+            "tracking",
+            "status",
+            "where",
+            "parcel",
+            "package",
+            "shipment",
+            "sampai mana",
+            "mana barang",
+            "belum sampai",
+        ]
     )
-    has_order_word = any(word in cleaned_text for word in ["order", "parcel", "package", "shipment", "delivery"])
-    has_refund_word = any(word in cleaned_text for word in ["refund", "rebate", "compensation", "money back"])
+    has_order_word = any(
+        word in cleaned_text
+        for word in ["order", "parcel", "package", "shipment", "delivery", "barang", "item"]
+    )
+    has_refund_word = any(
+        word in cleaned_text
+        for word in ["refund", "rebate", "compensation", "money back", "return money", "duit balik"]
+    )
 
     if has_tracking_word and has_order_word and not has_refund_word:
         return "track_order"
     if has_tracking_word and has_refund_word:
         return "track_refund"
-    if any(word in cleaned_text for word in ["cancel", "cancelling", "cancellation"]):
+    if any(word in cleaned_text for word in ["damaged", "broken", "cracked", "rosak", "pecah"]):
+        return "damaged_item"
+    if any(word in cleaned_text for word in ["wrong item", "wrong product", "different item", "salah barang"]):
+        return "wrong_item"
+    if any(word in cleaned_text for word in ["delay", "delayed", "late", "lambat", "not arrive", "not received"]):
+        return "delivery_period"
+    if any(word in cleaned_text for word in ["cancel", "cancelling", "cancellation", "batalkan"]):
         return "cancel_order"
-    if any(word in cleaned_text for word in ["payment", "paid", "charged", "card declined", "transaction"]):
+    if any(word in cleaned_text for word in ["payment method", "pay with", "cash on delivery", "cod"]):
+        return "check_payment_methods"
+    if any(
+        word in cleaned_text
+        for word in [
+            "payment",
+            "paid",
+            "charged",
+            "card declined",
+            "transaction",
+            "deducted",
+            "kena deduct",
+            "duit kena potong",
+        ]
+    ):
         return "payment_issue"
-    if any(word in cleaned_text for word in ["forgot password", "reset password", "cannot log in", "cant login"]):
+    if any(
+        word in cleaned_text
+        for word in ["forgot password", "reset password", "cannot log in", "cant login", "cannot login", "tak boleh login"]
+    ):
         return "recover_password"
-    if any(word in cleaned_text for word in ["complaint", "complain", "bad service", "not helpful"]):
+    if any(word in cleaned_text for word in ["refund policy", "can refund", "eligible refund"]):
+        return "check_refund_policy"
+    if has_refund_word:
+        return "get_refund"
+    if any(word in cleaned_text for word in ["change address", "wrong address", "shipping address", "alamat"]):
+        return "change_shipping_address"
+    if any(word in cleaned_text for word in ["invoice", "receipt", "resit"]):
+        return "get_invoice"
+    if any(word in cleaned_text for word in ["voucher", "coupon", "promo code", "discount code"]):
+        return "voucher_issue"
+    if any(word in cleaned_text for word in ["human agent", "real person", "live agent"]):
+        return "contact_human_agent"
+    if any(word in cleaned_text for word in ["contact support", "customer service", "seller never reply", "support"]):
+        return "contact_customer_service"
+    if any(word in cleaned_text for word in ["register", "sign up", "verification code"]):
+        return "registration_problems"
+    if any(word in cleaned_text for word in ["complaint", "complain", "bad service", "not helpful", "angry", "scam"]):
         return "complaint"
     return None
 
@@ -133,7 +314,12 @@ def predict_intent(message: str, model_type: str = "svm") -> dict:
 
     used_fallback = False
     fallback_reason = None
-    if rule_intent:
+    needs_clarification = rule_intent == "clarify"
+    if needs_clarification:
+        intent = "clarify"
+        used_fallback = True
+        fallback_reason = "User message is too vague"
+    elif rule_intent:
         intent = rule_intent
     elif model_type == "svm" and confidence is not None and confidence < SVM_CONFIDENCE_THRESHOLD:
         intent = "fallback"
@@ -147,7 +333,12 @@ def predict_intent(message: str, model_type: str = "svm") -> dict:
         intent = model_intent
 
     matching = responses_df[responses_df["intent"] == intent]["response"].dropna().tolist()
-    response = FALLBACK_RESPONSE if used_fallback else INTENT_RESPONSES.get(intent)
+    if intent == "clarify":
+        response = CLARIFICATION_RESPONSE
+    elif used_fallback:
+        response = FALLBACK_RESPONSE
+    else:
+        response = INTENT_RESPONSES.get(intent)
     if response is None:
         response = random.choice(matching) if matching else "I can help with your customer support request."
 

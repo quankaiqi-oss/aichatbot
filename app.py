@@ -383,9 +383,13 @@ if page == "Chatbot":
         "Track Order": "I want to track my order",
         "Request Refund": "I want to request a refund",
         "Payment Issue": "I have a payment issue",
-        "Delivery Help": "I need help with delivery",
-        "Account Help": "I have an account problem",
+        "Delivery Delay": "My parcel is late and has not arrived",
+        "Damaged Item": "My item arrived damaged",
+        "Wrong Item": "I received the wrong item",
         "Cancel Order": "I want to cancel my order",
+        "Change Address": "I need to change my shipping address",
+        "Voucher Issue": "My voucher cannot be used",
+        "Account Help": "I forgot my password and cannot login",
         "Contact Support": "I want to contact customer support",
         "Complaint": "I want to make a complaint",
     }
@@ -425,10 +429,9 @@ if page == "Chatbot":
     show_quick_replies = len(st.session_state["chat_history"]) == 1
     if show_quick_replies:
         st.caption("Quick topics")
-        first_row = st.columns(4)
-        second_row = st.columns(4)
+        quick_reply_rows = [st.columns(4) for _ in range((len(quick_replies) + 3) // 4)]
         for index, (label, message) in enumerate(quick_replies.items()):
-            row = first_row if index < 4 else second_row
+            row = quick_reply_rows[index // 4]
             if row[index % 4].button(label, use_container_width=True):
                 quick_message = message
 
@@ -466,8 +469,19 @@ if page == "Chatbot":
         st.rerun()
 
     if "last_prediction" in st.session_state:
+        result = st.session_state["last_prediction"]
+        with st.expander("Latest prediction details"):
+            confidence = result.get("confidence")
+            confidence_text = "N/A" if confidence is None else f"{confidence:.4f}"
+            detail_cols = st.columns(4)
+            detail_cols[0].metric("Selected Model", result["model"].upper())
+            detail_cols[1].metric("Final Intent", result["intent"])
+            detail_cols[2].metric("Model Intent", result.get("model_intent") or "N/A")
+            detail_cols[3].metric("Confidence", confidence_text)
+            if result.get("used_fallback"):
+                st.warning(result.get("fallback_reason") or "Fallback or clarification was used.")
+
         with st.expander("Rate the latest response"):
-            result = st.session_state["last_prediction"]
             with st.form("feedback_form"):
                 rating = st.slider("How useful was this response?", 1, 5, 4)
                 comment = st.text_input("Optional comment")
