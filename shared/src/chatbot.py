@@ -1,4 +1,5 @@
 from pathlib import Path
+from functools import lru_cache
 import random
 import re
 
@@ -26,12 +27,97 @@ CLARIFICATION_RESPONSE = (
     "order tracking, refund, cancellation, payment, account login, or contacting support?"
 )
 
+CONVERSATIONAL_RESPONSES = {
+    "greeting": "Hi, I am ShopCare MY. What online shopping issue can I help you with today?",
+    "thanks": "You are welcome. I am glad I could help.",
+    "goodbye": "Thanks for chatting with ShopCare MY. Hope your issue gets solved soon.",
+    "capability": (
+        "I can help with order tracking, refunds, payment issues, delivery delays, "
+        "cancellations, account access, vouchers, invoices, complaints, and contacting support."
+    ),
+    "positive_confirmation": "Okay, let us continue with this issue. What detail do you want to check next?",
+    "negative_confirmation": "No problem. Tell me the correct issue, such as refund, delivery, payment, or account login.",
+}
+
+EMPATHY_PREFIXES = {
+    "payment_issue": "Sorry about that, payment problems can be stressful. ",
+    "delivery_period": "I understand, waiting for a parcel can be frustrating. ",
+    "damaged_item": "Sorry your item arrived damaged. ",
+    "wrong_item": "Sorry about the wrong item. ",
+    "complaint": "I am sorry you had a bad experience. ",
+    "recover_password": "No worries, account login problems are common. ",
+}
+
+FOLLOW_UP_OPTIONS = {
+    "clarify": [
+        "My parcel is late",
+        "I want a refund",
+        "Payment was deducted",
+        "I need customer support",
+    ],
+    "fallback": [
+        "Track order",
+        "Request refund",
+        "Payment issue",
+        "Contact support",
+    ],
+    "track_order": [
+        "My parcel is late",
+        "I need tracking number help",
+        "Contact support",
+    ],
+    "delivery_period": [
+        "Contact support",
+        "Track order",
+        "Change shipping address",
+    ],
+    "get_refund": [
+        "Item damaged",
+        "Wrong item received",
+        "Check refund status",
+    ],
+    "track_refund": [
+        "Contact support",
+        "Check refund policy",
+        "Payment issue",
+    ],
+    "payment_issue": [
+        "Payment was deducted",
+        "Order not created",
+        "Contact support",
+    ],
+    "cancel_order": [
+        "Check cancellation fee",
+        "Change order",
+        "Contact support",
+    ],
+    "damaged_item": [
+        "Request refund",
+        "Contact support",
+        "Check refund policy",
+    ],
+    "wrong_item": [
+        "Request refund",
+        "Contact support",
+        "Check refund policy",
+    ],
+    "recover_password": [
+        "Cannot login",
+        "Contact support",
+        "Create account",
+    ],
+    "contact_customer_service": [
+        "Payment issue",
+        "Delivery delay",
+        "Complaint",
+    ],
+}
+
 INTENT_RESPONSES = {
     "track_order": (
-        "You can track your parcel by logging in to your account and opening the "
-        "My Orders section. Select the order, then check the delivery status and "
-        "tracking number. If the parcel is delayed, contact customer support with "
-        "your order number."
+        "Sure, I can guide you. First, open My Orders and select the order. Then check "
+        "the delivery status and tracking number. If the parcel is already late, prepare "
+        "your order number before contacting support."
     ),
     "track_refund": (
         "You can check your refund status from the refund or return section in "
@@ -39,9 +125,9 @@ INTENT_RESPONSES = {
         "order number, refund request date, and payment method before contacting support."
     ),
     "get_refund": (
-        "To request a refund, open your order details and choose the refund or return "
-        "option. Submit the reason and required proof if needed. The support team will "
-        "review the request based on the refund policy."
+        "Sure, I can help with that. Open My Orders, choose the item, then select Refund "
+        "or Return. Submit the reason and upload proof if needed, such as photos for a "
+        "damaged or wrong item."
     ),
     "cancel_order": (
         "To cancel an order, go to My Orders, choose the order, and select the cancel "
@@ -49,9 +135,9 @@ INTENT_RESPONSES = {
         "to request a return or contact customer support."
     ),
     "payment_issue": (
-        "For payment issues, check whether the amount was deducted and whether the order "
-        "was confirmed. If payment was deducted but the order failed, contact support with "
-        "your transaction reference."
+        "Please check two things first: whether the amount was deducted and whether the "
+        "order was created. If money was deducted but no order appears, contact support "
+        "with your transaction reference."
     ),
     "recover_password": (
         "Use the Forgot Password option on the login page. Enter your registered email or "
@@ -155,7 +241,45 @@ INTENT_RESPONSES = {
 }
 
 
-def rule_based_intent(cleaned_text: str) -> str | None:
+def conversational_intent(cleaned_text: str) -> str | None:
+    if cleaned_text in ["hi", "hello", "hey", "good morning", "good afternoon", "good evening"]:
+        return "greeting"
+    if cleaned_text in ["thanks", "thank you", "tq", "thx"]:
+        return "thanks"
+    if cleaned_text in ["bye", "goodbye", "see you"]:
+        return "goodbye"
+    if cleaned_text in ["ok", "okay", "yes", "yup", "sure"]:
+        return "positive_confirmation"
+    if cleaned_text in ["no", "nope", "not this"]:
+        return "negative_confirmation"
+    if any(phrase in cleaned_text for phrase in ["what can you do", "help me with what", "who are you"]):
+        return "capability"
+    return None
+
+
+def infer_from_previous_intent(cleaned_text: str, previous_intent: str | None) -> str | None:
+    if previous_intent not in ["get_refund", "track_refund", "damaged_item", "wrong_item", "payment_issue"]:
+        return None
+    if any(word in cleaned_text for word in ["damaged", "broken", "cracked", "rosak", "pecah"]):
+        return "damaged_item"
+    if any(word in cleaned_text for word in ["wrong", "different", "salah"]):
+        return "wrong_item"
+    if any(word in cleaned_text for word in ["deducted", "charged", "paid", "transaction"]):
+        return "payment_issue"
+    if any(word in cleaned_text for word in ["status", "pending", "not received", "where"]):
+        return "track_refund" if "refund" in previous_intent else previous_intent
+    return None
+
+
+def rule_based_intent(cleaned_text: str, previous_intent: str | None = None) -> str | None:
+    conversational = conversational_intent(cleaned_text)
+    if conversational:
+        return conversational
+
+    contextual = infer_from_previous_intent(cleaned_text, previous_intent)
+    if contextual:
+        return contextual
+
     vague_problem_words = ["problem", "issue", "help", "cannot", "cant", "tak boleh", "error"]
     has_only_vague_problem = (
         any(word in cleaned_text for word in vague_problem_words)
@@ -272,6 +396,7 @@ def clean_text(text: str) -> str:
     return text
 
 
+@lru_cache(maxsize=2)
 def load_artifacts(model_type: str = "svm"):
     model_file = "svm_model.pkl" if model_type == "svm" else "logistic_model.pkl"
     model = joblib.load(MODEL_DIRS[model_type] / model_file)
@@ -298,12 +423,33 @@ def format_response(response: str) -> str:
     return response
 
 
-def predict_intent(message: str, model_type: str = "svm") -> dict:
-    model, vectorizer, responses_df = load_artifacts(model_type)
+def build_response(intent: str, response: str) -> str:
+    if intent in EMPATHY_PREFIXES:
+        response = EMPATHY_PREFIXES[intent] + response
+    options = FOLLOW_UP_OPTIONS.get(intent, [])
+    if options:
+        response = response + "\n\nYou can also choose: " + ", ".join(options) + "."
+    return response
+
+
+def predict_intent(message: str, model_type: str = "svm", previous_intent: str | None = None) -> dict:
     cleaned = clean_text(message)
+    rule_intent = rule_based_intent(cleaned, previous_intent)
+
+    if rule_intent in CONVERSATIONAL_RESPONSES:
+        return {
+            "intent": rule_intent,
+            "model_intent": None,
+            "confidence": None,
+            "used_fallback": False,
+            "fallback_reason": None,
+            "response": CONVERSATIONAL_RESPONSES[rule_intent],
+            "follow_up_options": FOLLOW_UP_OPTIONS.get(rule_intent, []),
+        }
+
+    model, vectorizer, responses_df = load_artifacts(model_type)
     vector = vectorizer.transform([cleaned])
     model_intent = model.predict(vector)[0]
-    rule_intent = rule_based_intent(cleaned)
 
     confidence = None
     if hasattr(model, "decision_function"):
@@ -341,6 +487,7 @@ def predict_intent(message: str, model_type: str = "svm") -> dict:
         response = INTENT_RESPONSES.get(intent)
     if response is None:
         response = random.choice(matching) if matching else "I can help with your customer support request."
+    response = build_response(intent, format_response(response))
 
     return {
         "intent": intent,
@@ -348,5 +495,6 @@ def predict_intent(message: str, model_type: str = "svm") -> dict:
         "confidence": confidence,
         "used_fallback": used_fallback,
         "fallback_reason": fallback_reason,
-        "response": format_response(response),
+        "response": response,
+        "follow_up_options": FOLLOW_UP_OPTIONS.get(intent, []),
     }

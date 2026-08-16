@@ -18,6 +18,17 @@ MODEL_RESULT_DIRS = {
     "logistic": BASE_DIR / "kathy_logistic" / "results",
 }
 
+NON_SUPPORT_INTENTS = {
+    "greeting",
+    "thanks",
+    "goodbye",
+    "capability",
+    "positive_confirmation",
+    "negative_confirmation",
+    "clarify",
+    "fallback",
+}
+
 st.set_page_config(
     page_title="ShopCare MY",
     layout="wide",
@@ -435,8 +446,18 @@ if page == "Chatbot":
             if row[index % 4].button(label, use_container_width=True):
                 quick_message = message
 
+    suggested_message = None
+    if "last_prediction" in st.session_state:
+        suggestions = st.session_state["last_prediction"].get("follow_up_options", [])
+        if suggestions:
+            st.caption("Suggested replies")
+            suggestion_cols = st.columns(min(4, len(suggestions)))
+            for index, suggestion in enumerate(suggestions[:4]):
+                if suggestion_cols[index].button(suggestion, key=f"suggestion_{index}", use_container_width=True):
+                    suggested_message = suggestion
+
     user_message = st.chat_input("Type your customer support question...")
-    submitted_message = quick_message or user_message
+    submitted_message = quick_message or suggested_message or user_message
 
     if submitted_message:
         st.session_state["chat_history"].append(
@@ -444,7 +465,12 @@ if page == "Chatbot":
         )
 
         try:
-            result = predict_intent(submitted_message, model_type=model_type)
+            previous_intent = st.session_state.get("last_support_intent")
+            result = predict_intent(
+                submitted_message,
+                model_type=model_type,
+                previous_intent=previous_intent,
+            )
             assistant_message = {
                 "role": "assistant",
                 "content": result["response"],
@@ -455,9 +481,12 @@ if page == "Chatbot":
                 "used_fallback": result.get("used_fallback", False),
                 "fallback_reason": result.get("fallback_reason"),
                 "user_message": submitted_message,
+                "follow_up_options": result.get("follow_up_options", []),
             }
             st.session_state["chat_history"].append(assistant_message)
             st.session_state["last_prediction"] = assistant_message
+            if result["intent"] not in NON_SUPPORT_INTENTS:
+                st.session_state["last_support_intent"] = result["intent"]
             st.rerun()
         except FileNotFoundError:
             st.error("Model files are missing. Please run preprocessing and training first.")
@@ -466,6 +495,7 @@ if page == "Chatbot":
     if col1.button("Start New Chat"):
         st.session_state.pop("chat_history", None)
         st.session_state.pop("last_prediction", None)
+        st.session_state.pop("last_support_intent", None)
         st.rerun()
 
     if "last_prediction" in st.session_state:
