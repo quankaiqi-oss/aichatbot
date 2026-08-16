@@ -4,7 +4,7 @@ import csv
 import html
 import json
 
-import matplotlib.pyplot as plt
+import altair as alt
 import pandas as pd
 import streamlit as st
 
@@ -58,81 +58,76 @@ def load_metrics_table() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def clean_table_html(df: pd.DataFrame) -> str:
-    safe_df = df.copy()
-    safe_df.columns = [html.escape(str(column)) for column in safe_df.columns]
-    rows_html = []
-    for _, row in safe_df.iterrows():
-        cells = "".join(f"<td>{html.escape(str(value))}</td>" for value in row)
-        rows_html.append(f"<tr>{cells}</tr>")
-    headers = "".join(f"<th>{column}</th>" for column in safe_df.columns)
-    return f"""
-    <table class="clean-table">
-        <thead><tr>{headers}</tr></thead>
-        <tbody>{''.join(rows_html)}</tbody>
-    </table>
-    """
+def interactive_metric_chart(chart_df: pd.DataFrame, title: str):
+    long_df = chart_df.melt(id_vars="Model", var_name="Metric", value_name="Score")
+    min_score = max(0.0, float(long_df["Score"].min()) - 0.003)
+    nearest = alt.selection_point(nearest=True, on="pointerover", fields=["Model", "Metric"], empty=False)
+    base = (
+        alt.Chart(long_df)
+        .encode(
+            x=alt.X("Metric:N", title=None, sort=["Accuracy", "Precision", "Recall", "F1 Score"]),
+            y=alt.Y("Score:Q", scale=alt.Scale(domain=[min_score, 1.002]), title="Score"),
+            color=alt.Color(
+                "Model:N",
+                scale=alt.Scale(range=["#5C4444", "#b4cfcb", "#8f7676"]),
+                legend=alt.Legend(orient="top", title=None),
+            ),
+            tooltip=[
+                alt.Tooltip("Model:N"),
+                alt.Tooltip("Metric:N"),
+                alt.Tooltip("Score:Q", format=".4f"),
+            ],
+        )
+        .properties(height=330, title=title)
+    )
+    lines = base.mark_line(point=True, strokeWidth=3)
+    points = base.mark_circle(size=90).encode(opacity=alt.condition(nearest, alt.value(1), alt.value(0)))
+    rules = base.mark_rule(color="#d8d2c3").encode(opacity=alt.condition(nearest, alt.value(0.45), alt.value(0)))
+    return (lines + points + rules).interactive()
 
 
-def render_clean_table(df: pd.DataFrame) -> None:
-    st.markdown(clean_table_html(df), unsafe_allow_html=True)
+def interactive_single_metric_chart(summary_df: pd.DataFrame, title: str):
+    chart = (
+        alt.Chart(summary_df)
+        .mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6)
+        .encode(
+            x=alt.X("Metric:N", title=None, sort="-y"),
+            y=alt.Y("Score:Q", scale=alt.Scale(domain=[0, 1.04]), title="Score"),
+            color=alt.Color("Metric:N", scale=alt.Scale(range=CHART_COLORS), legend=None),
+            tooltip=[alt.Tooltip("Metric:N"), alt.Tooltip("Score:Q", format=".4f")],
+        )
+        .properties(height=330, title=title)
+        .interactive()
+    )
+    return chart
 
 
-def draw_metric_chart(chart_df: pd.DataFrame, title: str):
-    fig, ax = plt.subplots(figsize=(7.2, 3.9))
-    fig.patch.set_facecolor("#fffdf8")
-    ax.set_facecolor("#fffdf8")
-    if len(chart_df.index) > 1:
-        metrics = list(chart_df.columns)
-        for index, (model_name, row) in enumerate(chart_df.iterrows()):
-            ax.plot(
-                metrics,
-                row[metrics],
-                marker="o",
-                linewidth=2.4,
-                markersize=6,
-                color=CHART_COLORS[index % len(CHART_COLORS)],
-                label=model_name,
-            )
-        ax.set_ylim(max(0.98, float(chart_df.min().min()) - 0.004), 1.002)
-    else:
-        chart_df.plot(kind="bar", ax=ax, color=CHART_COLORS[: len(chart_df.columns)], width=0.58)
-        ax.set_ylim(0, 1.04)
-    ax.set_title(title, color="#5C4444", fontsize=12, fontweight="bold", pad=12)
-    ax.tick_params(axis="x", rotation=0, colors="#5C4444", labelsize=9)
-    ax.tick_params(axis="y", colors="#756464", labelsize=8)
-    ax.grid(axis="y", color="#EDE7D5", linewidth=0.8)
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    ax.spines["left"].set_color("#d8d2c3")
-    ax.spines["bottom"].set_color("#d8d2c3")
-    ax.legend(frameon=False, fontsize=8, labelcolor="#5C4444", loc="best")
-    fig.tight_layout()
-    return fig
-
-
-def draw_speed_chart(chart_df: pd.DataFrame):
-    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.6))
-    fig.patch.set_facecolor("#fffdf8")
-    speed_columns = ["Training Time (s)", "Avg Prediction Time (ms)"]
-    titles = ["Training Time", "Prediction Time"]
-
-    for ax, column, title in zip(axes, speed_columns, titles):
-        ax.set_facecolor("#fffdf8")
-        sorted_df = chart_df.sort_values(column, ascending=True)
-        colors = ["#b4cfcb", "#5C4444"][: len(sorted_df)]
-        ax.barh(sorted_df["Model"], sorted_df[column], color=colors, height=0.42)
-        ax.set_title(title, color="#5C4444", fontsize=11, fontweight="bold", pad=10)
-        ax.tick_params(axis="x", colors="#756464", labelsize=8)
-        ax.tick_params(axis="y", colors="#5C4444", labelsize=8)
-        ax.grid(axis="x", color="#EDE7D5", linewidth=0.8)
-        ax.spines["top"].set_visible(False)
-        ax.spines["right"].set_visible(False)
-        ax.spines["left"].set_color("#d8d2c3")
-        ax.spines["bottom"].set_color("#d8d2c3")
-
-    fig.tight_layout()
-    return fig
+def interactive_speed_chart(speed_df: pd.DataFrame):
+    long_df = speed_df.melt(
+        id_vars="Model",
+        value_vars=["Training Time (s)", "Avg Prediction Time (ms)"],
+        var_name="Metric",
+        value_name="Value",
+    )
+    chart = (
+        alt.Chart(long_df)
+        .mark_bar(cornerRadiusTopRight=6, cornerRadiusBottomRight=6)
+        .encode(
+            y=alt.Y("Model:N", sort="-x", title=None),
+            x=alt.X("Value:Q", title=None),
+            color=alt.Color("Model:N", scale=alt.Scale(range=["#5C4444", "#b4cfcb"]), legend=None),
+            tooltip=[
+                alt.Tooltip("Model:N"),
+                alt.Tooltip("Metric:N"),
+                alt.Tooltip("Value:Q", format=".6f"),
+            ],
+        )
+        .properties(height=150)
+        .facet(column=alt.Column("Metric:N", title=None))
+        .resolve_scale(x="independent")
+        .interactive()
+    )
+    return chart
 
 st.set_page_config(
     page_title="ShopCare MY",
@@ -846,16 +841,6 @@ elif page == "Model Evaluation":
 
     if metrics_path.exists():
         metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
-        st.markdown(
-            f"""
-            <div class="insight-grid">
-                <div class="insight-card"><small>Selected Model</small><strong>{html.escape(selected_label)}</strong><span>Current evaluation view</span></div>
-                <div class="insight-card"><small>F1 Score</small><strong>{metrics['f1_score']:.4f}</strong><span>Intent classification balance</span></div>
-                <div class="insight-card"><small>Average Prediction</small><strong>{metrics.get('average_prediction_time_ms', 0):.6f} ms</strong><span>Response speed per input</span></div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
         summary_df = pd.DataFrame(
             {
                 "Metric": ["Accuracy", "Precision", "Recall", "F1 Score"],
@@ -867,6 +852,7 @@ elif page == "Model Evaluation":
                 ],
             }
         )
+        sorted_summary_df = summary_df.sort_values("Score", ascending=False)
         speed_df = pd.DataFrame(
             {
                 "Metric": ["Training Time (s)", "Prediction Time (s)", "Avg Prediction Time (ms)"],
@@ -878,60 +864,61 @@ elif page == "Model Evaluation":
             }
         )
 
+        card1, card2, card3 = st.columns(3)
+        card1.metric("Selected Model", selected_label)
+        card2.metric("F1 Score", f"{metrics['f1_score']:.4f}")
+        card3.metric("Avg Prediction", f"{metrics.get('average_prediction_time_ms', 0):.6f} ms")
+
         left_col, right_col = st.columns([1.08, 1])
         with left_col:
-            sorted_summary_df = summary_df.sort_values("Score", ascending=False)
-            display_summary_df = sorted_summary_df.copy()
-            display_summary_df["Score"] = display_summary_df["Score"].map(lambda value: f"{value:.4f}")
-            st.markdown(
-                f"""
-                <div class="analysis-card">
-                    <h3>Sorted Metric Table</h3>
-                    {clean_table_html(display_summary_df)}
-                    <div class="soft-note">Metrics are sorted from highest score to lowest score.</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            with st.container(border=True):
+                st.subheader("Metric Table")
+                st.caption("Sortable table. Click a column header to sort.")
+                st.dataframe(
+                    sorted_summary_df,
+                    use_container_width=True,
+                    hide_index=True,
+                    column_config={"Score": st.column_config.NumberColumn(format="%.4f")},
+                )
 
-            display_speed_df = speed_df.copy()
-            display_speed_df["Value"] = display_speed_df["Value"].map(lambda value: f"{value:.6f}")
-            st.markdown(
-                f"""
-                <div class="analysis-card">
-                    <h3>Speed Table</h3>
-                    {clean_table_html(display_speed_df)}
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            with st.container(border=True):
+                st.subheader("Speed Table")
+                st.caption("Sortable table. Click a column header to sort.")
+                st.dataframe(
+                    speed_df.sort_values("Value", ascending=True),
+                    use_container_width=True,
+                    hide_index=True,
+                    column_config={"Value": st.column_config.NumberColumn(format="%.6f")},
+                )
 
         with right_col:
-            st.markdown('<div class="analysis-card"><h3>Metric Chart</h3></div>', unsafe_allow_html=True)
-            chart_df = summary_df.set_index("Metric").T
-            st.pyplot(draw_metric_chart(chart_df, f"{selected_label} Metrics"), use_container_width=True)
+            with st.container(border=True):
+                st.subheader("Interactive Metric Chart")
+                st.caption("Hover for values. Drag or scroll to move/zoom.")
+                st.altair_chart(
+                    interactive_single_metric_chart(summary_df, f"{selected_label} Metrics"),
+                    use_container_width=True,
+                )
 
         if report_path.exists():
             report_df = pd.read_csv(report_path)
             report_df = report_df.rename(columns={report_df.columns[0]: "Intent"})
             if "f1-score" in report_df.columns:
                 report_df = report_df.sort_values("f1-score", ascending=False)
-            display_report_df = report_df.copy()
-            for column in ["precision", "recall", "f1-score"]:
-                if column in display_report_df.columns:
-                    display_report_df[column] = display_report_df[column].map(lambda value: f"{value:.4f}")
-            if "support" in display_report_df.columns:
-                display_report_df["support"] = display_report_df["support"].map(lambda value: f"{value:.0f}")
-            st.markdown(
-                f"""
-                <div class="analysis-card">
-                    <h3>Per-Intent Classification Report</h3>
-                    {clean_table_html(display_report_df.head(12))}
-                    <div class="soft-note">Showing top 12 intents sorted by F1 score.</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            with st.container(border=True):
+                st.subheader("Per-Intent Classification Report")
+                st.caption("Sortable report. Default view is sorted by F1 score.")
+                st.dataframe(
+                    report_df,
+                    use_container_width=True,
+                    hide_index=True,
+                    column_config={
+                        "precision": st.column_config.NumberColumn(format="%.4f"),
+                        "recall": st.column_config.NumberColumn(format="%.4f"),
+                        "f1-score": st.column_config.NumberColumn(format="%.4f"),
+                        "support": st.column_config.NumberColumn(format="%.0f"),
+                    },
+                )
     else:
         st.info("Evaluation results are not generated yet.")
 
@@ -945,40 +932,43 @@ elif page == "Model Comparison":
         best_f1 = comparison_df.iloc[0]
         fastest = comparison_df.sort_values("Avg Prediction Time (ms)", ascending=True).iloc[0]
 
-        st.markdown(
-            f"""
-            <div class="insight-grid">
-                <div class="insight-card"><small>Best Overall</small><strong>{html.escape(best_f1['Model'])}</strong><span>F1 Score {best_f1['F1 Score']:.4f}</span></div>
-                <div class="insight-card"><small>Highest Accuracy</small><strong>{best_f1['Accuracy']:.4f}</strong><span>{html.escape(best_f1['Model'])}</span></div>
-                <div class="insight-card"><small>Fastest Prediction</small><strong>{fastest['Avg Prediction Time (ms)']:.6f} ms</strong><span>{html.escape(fastest['Model'])}</span></div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        card1, card2, card3 = st.columns(3)
+        card1.metric("Best Overall", best_f1["Model"], f"F1 {best_f1['F1 Score']:.4f}")
+        card2.metric("Highest Accuracy", best_f1["Model"], f"{best_f1['Accuracy']:.4f}")
+        card3.metric("Fastest Prediction", fastest["Model"], f"{fastest['Avg Prediction Time (ms)']:.6f} ms")
 
         left_col, right_col = st.columns([1.08, 1])
         with left_col:
-            display_df = comparison_df.copy()
-            for column in ["Accuracy", "Precision", "Recall", "F1 Score"]:
-                display_df[column] = display_df[column].map(lambda value: f"{value:.4f}")
-            display_df["Training Time (s)"] = display_df["Training Time (s)"].map(lambda value: f"{value:.4f}")
-            display_df["Avg Prediction Time (ms)"] = display_df["Avg Prediction Time (ms)"].map(lambda value: f"{value:.6f}")
-            st.markdown(
-                f"""
-                <div class="analysis-card">
-                    <h3>Sorted Comparison Table</h3>
-                    {clean_table_html(display_df)}
-                    <div class="soft-note">Best overall model: {html.escape(best_f1['Model'])}
-                    (F1 Score {best_f1['F1 Score']:.4f}, Accuracy {best_f1['Accuracy']:.4f}).</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            with st.container(border=True):
+                st.subheader("Sortable Comparison Table")
+                st.caption("Default sorting is by F1 Score. Click any column header to sort.")
+                st.dataframe(
+                    comparison_df,
+                    use_container_width=True,
+                    hide_index=True,
+                    column_config={
+                        "Accuracy": st.column_config.NumberColumn(format="%.4f"),
+                        "Precision": st.column_config.NumberColumn(format="%.4f"),
+                        "Recall": st.column_config.NumberColumn(format="%.4f"),
+                        "F1 Score": st.column_config.NumberColumn(format="%.4f"),
+                        "Training Time (s)": st.column_config.NumberColumn(format="%.4f"),
+                        "Avg Prediction Time (ms)": st.column_config.NumberColumn(format="%.6f"),
+                    },
+                )
+                st.caption(
+                    f"Best overall model: {best_f1['Model']} "
+                    f"(F1 Score {best_f1['F1 Score']:.4f}, Accuracy {best_f1['Accuracy']:.4f})."
+                )
 
         with right_col:
-            st.markdown('<div class="analysis-card"><h3>Classification Trend</h3></div>', unsafe_allow_html=True)
-            metric_chart_df = comparison_df.set_index("Model")[["Accuracy", "Precision", "Recall", "F1 Score"]]
-            st.pyplot(draw_metric_chart(metric_chart_df, "Classification Comparison"), use_container_width=True)
+            with st.container(border=True):
+                st.subheader("Interactive Classification Chart")
+                st.caption("Hover for values. Drag or scroll to move/zoom.")
+                metric_chart_df = comparison_df[["Model", "Accuracy", "Precision", "Recall", "F1 Score"]]
+                st.altair_chart(
+                    interactive_metric_chart(metric_chart_df, "Classification Comparison"),
+                    use_container_width=True,
+                )
 
         speed_left, speed_right = st.columns([1.08, 1])
         with speed_left:
@@ -986,21 +976,23 @@ elif page == "Model Comparison":
                 "Avg Prediction Time (ms)",
                 ascending=True,
             )
-            speed_display_df = speed_table.copy()
-            speed_display_df["Training Time (s)"] = speed_display_df["Training Time (s)"].map(lambda value: f"{value:.4f}")
-            speed_display_df["Avg Prediction Time (ms)"] = speed_display_df["Avg Prediction Time (ms)"].map(lambda value: f"{value:.6f}")
-            st.markdown(
-                f"""
-                <div class="analysis-card">
-                    <h3>Sorted Speed Table</h3>
-                    {clean_table_html(speed_display_df)}
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            with st.container(border=True):
+                st.subheader("Sortable Speed Table")
+                st.caption("Default sorting is by average prediction time.")
+                st.dataframe(
+                    speed_table,
+                    use_container_width=True,
+                    hide_index=True,
+                    column_config={
+                        "Training Time (s)": st.column_config.NumberColumn(format="%.4f"),
+                        "Avg Prediction Time (ms)": st.column_config.NumberColumn(format="%.6f"),
+                    },
+                )
         with speed_right:
-            st.markdown('<div class="analysis-card"><h3>Speed Chart</h3></div>', unsafe_allow_html=True)
-            st.pyplot(draw_speed_chart(comparison_df), use_container_width=True)
+            with st.container(border=True):
+                st.subheader("Interactive Speed Chart")
+                st.caption("Hover for values. Drag or scroll to move/zoom.")
+                st.altair_chart(interactive_speed_chart(comparison_df), use_container_width=True)
     else:
         st.info("Comparison results are not generated yet.")
 
