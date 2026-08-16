@@ -224,8 +224,8 @@ st.markdown(
             gap: 0.65rem;
             align-items: flex-start;
             margin: 1.15rem 0;
-            width: min(1040px, 100%);
-            margin-left: auto;
+            width: min(900px, 100%);
+            margin-left: 7%;
             margin-right: auto;
         }
 
@@ -256,7 +256,7 @@ st.markdown(
         .chat-bubble {
             display: inline-block;
             width: fit-content;
-            max-width: min(720px, 74%);
+            max-width: min(640px, 74%);
             padding: 0.95rem 1.08rem;
             border-radius: 10px;
             border: 1px solid #d8d2c3;
@@ -275,12 +275,12 @@ st.markdown(
             background: #b4cfcb;
             border-color: #a4c3be;
             color: #000000;
-            max-width: min(620px, 60%);
+            max-width: min(500px, 58%);
         }
 
         .chat-control-area {
-            width: min(1040px, 100%);
-            margin: 0.5rem auto 0 auto;
+            width: min(900px, 100%);
+            margin: 0.5rem auto 0 7%;
         }
 
         .chat-control-area .stButton > button {
@@ -288,8 +288,8 @@ st.markdown(
         }
 
         .chat-followups {
-            width: min(1040px, 100%);
-            margin: 0.2rem auto 0 auto;
+            width: min(900px, 100%);
+            margin: 0.2rem auto 0 7%;
             padding-left: 2.65rem;
         }
 
@@ -307,8 +307,8 @@ st.markdown(
             border: 1px solid var(--line);
             border-radius: 7px;
             background: rgba(255, 255, 255, 0.88);
-            max-width: 1040px;
-            margin-left: auto;
+            max-width: 900px;
+            margin-left: 7%;
             margin-right: auto;
         }
 
@@ -373,8 +373,8 @@ st.markdown(
         }
 
         [data-testid="stChatInput"] {
-            max-width: 1040px !important;
-            margin-left: auto !important;
+            max-width: 900px !important;
+            margin-left: 7% !important;
             margin-right: auto !important;
         }
 
@@ -392,8 +392,8 @@ st.markdown(
             padding: 0.35rem 0.45rem !important;
             box-shadow: 0 8px 20px rgba(92, 68, 68, 0.045) !important;
             width: 100% !important;
-            max-width: 1040px !important;
-            margin-left: auto !important;
+            max-width: 900px !important;
+            margin-left: 7% !important;
             margin-right: auto !important;
         }
 
@@ -414,6 +414,18 @@ st.markdown(
         @media (max-width: 760px) {
             .app-hero {
                 display: block;
+            }
+
+            .chat-row,
+            .chat-control-area,
+            .chat-followups,
+            div[data-testid="stExpander"],
+            [data-testid="stChatInput"],
+            [data-testid="stChatInput"] > div {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
             }
 
             .status-strip {
