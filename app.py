@@ -128,8 +128,8 @@ st.markdown(
                 linear-gradient(135deg, rgba(255, 253, 248, 0.96), rgba(242, 238, 228, 0.9));
             border: 1px solid rgba(184, 174, 157, 0.55);
             border-radius: 8px;
-            padding: 0.72rem 1rem;
-            margin-bottom: 0.75rem;
+            padding: 1.05rem 1.15rem;
+            margin-bottom: 1.1rem;
             box-shadow:
                 0 6px 16px rgba(43, 41, 37, 0.045),
                 inset 0 1px 0 rgba(255, 255, 255, 0.75);
@@ -138,21 +138,23 @@ st.markdown(
         .app-hero h1 {
             margin: 0;
             color: #10233f;
-            font-size: 1.38rem;
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 1.72rem;
+            font-weight: 800;
             line-height: 1.1;
             letter-spacing: 0;
         }
 
         .app-hero p {
-            margin: 0.22rem 0 0 0;
+            margin: 0.42rem 0 0 0;
             color: var(--muted);
-            font-size: 0.84rem;
+            font-size: 0.9rem;
         }
 
         .eyebrow {
-            margin-bottom: 0.18rem !important;
+            margin-bottom: 0.34rem !important;
             color: #87633a !important;
-            font-size: 0.68rem !important;
+            font-size: 0.7rem !important;
             font-weight: 700;
             letter-spacing: 0;
             text-transform: uppercase;
@@ -356,22 +358,10 @@ st.markdown(
     """
     <div class="app-hero">
         <div>
-            <p class="eyebrow">Machine Learning Chatbot Prototype</p>
+            <p class="eyebrow">Customer Support Assistant</p>
             <h1>ShopCare MY</h1>
-            <p>Customer support chatbot for Malaysian online shoppers, powered by TF-IDF intent classification.</p>
+            <p>Online shopping help for orders, refunds, payments, delivery, and account issues.</p>
         </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
-st.markdown(
-    """
-    <div class="status-strip">
-        <div class="status-card"><small>Prototype Type</small><strong>ML Chatbot</strong></div>
-        <div class="status-card"><small>KaiQi Module</small><strong>TF-IDF + Linear SVM</strong></div>
-        <div class="status-card"><small>Kathy Module</small><strong>TF-IDF + Logistic Regression</strong></div>
-        <div class="status-card"><small>Evaluation</small><strong>Accuracy, F1, Feedback</strong></div>
     </div>
     """,
     unsafe_allow_html=True,
