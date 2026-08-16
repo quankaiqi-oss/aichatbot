@@ -87,13 +87,13 @@ def interactive_metric_chart(chart_df: pd.DataFrame, title: str):
 
 
 def interactive_single_metric_chart(summary_df: pd.DataFrame, title: str):
-    min_score = max(0.0, float(summary_df["Score"].min()) - 0.01)
+    sorted_df = summary_df.sort_values("Score", ascending=False)
     chart = (
-        alt.Chart(summary_df)
+        alt.Chart(sorted_df)
         .mark_bar(cornerRadiusTopRight=7, cornerRadiusBottomRight=7)
         .encode(
-            y=alt.Y("Metric:N", title=None, sort="-x"),
-            x=alt.X("Score:Q", scale=alt.Scale(domain=[min_score, 1.0]), title="Score"),
+            y=alt.Y("Metric:N", title=None, sort=list(sorted_df["Metric"])),
+            x=alt.X("Score:Q", scale=alt.Scale(domain=[0, 1.0]), title="Score"),
             color=alt.Color("Metric:N", scale=alt.Scale(range=CHART_COLORS), legend=None),
             tooltip=[alt.Tooltip("Metric:N"), alt.Tooltip("Score:Q", format=".4f")],
         )
@@ -101,11 +101,11 @@ def interactive_single_metric_chart(summary_df: pd.DataFrame, title: str):
         .interactive()
     )
     labels = (
-        alt.Chart(summary_df)
+        alt.Chart(sorted_df)
         .mark_text(align="left", baseline="middle", dx=5, color="#5C4444", fontSize=12)
         .encode(
-            y=alt.Y("Metric:N", title=None, sort="-x"),
-            x=alt.X("Score:Q", scale=alt.Scale(domain=[min_score, 1.0])),
+            y=alt.Y("Metric:N", title=None, sort=list(sorted_df["Metric"])),
+            x=alt.X("Score:Q", scale=alt.Scale(domain=[0, 1.0])),
             text=alt.Text("Score:Q", format=".4f"),
         )
     )
