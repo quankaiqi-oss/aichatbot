@@ -292,6 +292,32 @@ st.markdown(
             font-size: 0.88rem;
         }
 
+        .model-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.45rem 1rem;
+            max-width: 620px;
+            padding: 0.15rem 0 0.35rem 0;
+        }
+
+        .model-detail-item {
+            display: grid;
+            grid-template-columns: 8.5rem minmax(0, 1fr);
+            gap: 0.65rem;
+            align-items: baseline;
+            font-size: 0.86rem;
+        }
+
+        .model-detail-item span {
+            color: var(--muted);
+        }
+
+        .model-detail-item strong {
+            color: var(--ink);
+            font-weight: 650;
+            overflow-wrap: anywhere;
+        }
+
         [data-testid="stDataFrame"] {
             border: 1px solid var(--line);
             border-radius: 8px;
@@ -504,11 +530,16 @@ if page == "Chatbot":
         with st.expander("Model details for evaluation"):
             confidence = result.get("confidence")
             confidence_text = "N/A" if confidence is None else f"{confidence:.4f}"
-            detail_cols = st.columns(4)
-            detail_cols[0].metric("Selected Model", result["model"].upper())
-            detail_cols[1].metric("Final Intent", result["intent"])
-            detail_cols[2].metric("Model Intent", result.get("model_intent") or "N/A")
-            detail_cols[3].metric("Confidence", confidence_text)
+            model_intent = result.get("model_intent") or "N/A"
+            detail_html = f"""
+            <div class="model-detail-grid">
+                <div class="model-detail-item"><span>Selected model</span><strong>{html.escape(result["model"].upper())}</strong></div>
+                <div class="model-detail-item"><span>Confidence</span><strong>{html.escape(confidence_text)}</strong></div>
+                <div class="model-detail-item"><span>Final intent</span><strong>{html.escape(result["intent"])}</strong></div>
+                <div class="model-detail-item"><span>Model intent</span><strong>{html.escape(model_intent)}</strong></div>
+            </div>
+            """
+            st.markdown(detail_html, unsafe_allow_html=True)
             if result.get("used_fallback"):
                 st.warning(result.get("fallback_reason") or "Fallback or clarification was used.")
 
