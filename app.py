@@ -87,19 +87,29 @@ def interactive_metric_chart(chart_df: pd.DataFrame, title: str):
 
 
 def interactive_single_metric_chart(summary_df: pd.DataFrame, title: str):
+    min_score = max(0.0, float(summary_df["Score"].min()) - 0.01)
     chart = (
         alt.Chart(summary_df)
-        .mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6)
+        .mark_bar(cornerRadiusTopRight=7, cornerRadiusBottomRight=7)
         .encode(
-            x=alt.X("Metric:N", title=None, sort="-y"),
-            y=alt.Y("Score:Q", scale=alt.Scale(domain=[0, 1.04]), title="Score"),
+            y=alt.Y("Metric:N", title=None, sort="-x"),
+            x=alt.X("Score:Q", scale=alt.Scale(domain=[min_score, 1.0]), title="Score"),
             color=alt.Color("Metric:N", scale=alt.Scale(range=CHART_COLORS), legend=None),
             tooltip=[alt.Tooltip("Metric:N"), alt.Tooltip("Score:Q", format=".4f")],
         )
-        .properties(height=330, title=title)
+        .properties(height=260, title=title)
         .interactive()
     )
-    return chart
+    labels = (
+        alt.Chart(summary_df)
+        .mark_text(align="left", baseline="middle", dx=5, color="#5C4444", fontSize=12)
+        .encode(
+            y=alt.Y("Metric:N", title=None, sort="-x"),
+            x=alt.X("Score:Q", scale=alt.Scale(domain=[min_score, 1.0])),
+            text=alt.Text("Score:Q", format=".4f"),
+        )
+    )
+    return chart + labels
 
 
 def interactive_speed_chart(speed_df: pd.DataFrame):
