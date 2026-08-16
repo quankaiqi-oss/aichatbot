@@ -522,7 +522,6 @@ if page == "Chatbot":
             </div>
             """
         else:
-            meta_html = ""
             if message.get("model") and message.get("intent"):
                 confidence = message.get("confidence")
                 confidence_text = "N/A" if confidence is None else f"{confidence:.4f}"
@@ -536,15 +535,22 @@ if page == "Chatbot":
                 if message.get("used_fallback") and message.get("fallback_reason"):
                     meta_text += f" | {message['fallback_reason']}"
                 meta_html = f'<div class="chat-meta">{html.escape(meta_text)}</div>'
-            message_html = f"""
-            <div class="chat-row assistant">
-                <div class="chat-avatar">{avatar}</div>
-                <div class="chat-message-stack">
-                    <div class="chat-bubble">{safe_content}</div>
-                    {meta_html}
+                message_html = f"""
+                <div class="chat-row assistant">
+                    <div class="chat-avatar">{avatar}</div>
+                    <div class="chat-message-stack">
+                        <div class="chat-bubble">{safe_content}</div>
+                        {meta_html}
+                    </div>
                 </div>
-            </div>
-            """
+                """
+            else:
+                message_html = f"""
+                <div class="chat-row assistant">
+                    <div class="chat-avatar">{avatar}</div>
+                    <div class="chat-bubble">{safe_content}</div>
+                </div>
+                """
         st.markdown(message_html, unsafe_allow_html=True)
 
     quick_message = None
