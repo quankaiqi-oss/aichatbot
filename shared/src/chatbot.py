@@ -23,23 +23,23 @@ FALLBACK_RESPONSE = (
 )
 
 CLARIFICATION_RESPONSE = (
-    "I can assist you, but I need one more detail before giving the correct guidance.\n\n"
+    "I can assist you, but I need one more detail before giving the correct guidance.\n"
     "Please choose the issue category:\n"
     "- Order tracking or delivery delay\n"
     "- Refund or return request\n"
     "- Payment issue\n"
     "- Account login problem\n"
-    "- Cancellation or customer support\n\n"
+    "- Cancellation or customer support\n"
     "Which issue would you like help with?"
 )
 
 CONVERSATIONAL_RESPONSES = {
     "greeting": (
-        "Hi, I am ShopCare MY. I can assist with common online shopping support issues.\n\n"
+        "Hi, I am ShopCare MY. I can assist with common online shopping support issues.\n"
         "You may ask about:\n"
         "- Order tracking and delivery delay\n"
         "- Refunds, returns, or damaged items\n"
-        "- Payment, account, voucher, or complaint issues\n\n"
+        "- Payment, account, voucher, or complaint issues\n"
         "What issue would you like help with?"
     ),
     "thanks": "You are welcome. Would you like help with anything else?",
@@ -128,46 +128,46 @@ FOLLOW_UP_OPTIONS = {
 
 INTENT_RESPONSES = {
     "track_order": (
-        "To track your order, please follow these steps:\n\n"
+        "To track your order, please follow these steps:\n"
         "- Open the My Orders section in your account.\n"
         "- Select the order that you want to check.\n"
         "- Review the delivery status and tracking number.\n"
         "- If the parcel is delayed, prepare your order number before contacting support."
     ),
     "track_refund": (
-        "To check your refund status, please follow these steps:\n\n"
+        "To check your refund status, please follow these steps:\n"
         "- Open the refund or return section in your account.\n"
         "- Check whether the refund request is still processing or already approved.\n"
         "- Prepare your order number, refund request date, and payment method if support is needed."
     ),
     "get_refund": (
-        "To request a refund, please follow these steps:\n\n"
+        "To request a refund, please follow these steps:\n"
         "- Open My Orders and select the affected item.\n"
         "- Choose the Refund or Return option.\n"
         "- Provide a clear reason for the refund request.\n"
         "- Upload supporting proof if needed, such as photos for damaged or wrong items."
     ),
     "cancel_order": (
-        "To cancel an order, please check the order status first:\n\n"
+        "To cancel an order, please check the order status first:\n"
         "- Open My Orders and select the order.\n"
         "- Choose Cancel if the cancellation option is still available.\n"
         "- If the order has already shipped, you may need to request a return or contact support."
     ),
     "payment_issue": (
-        "For payment issues, please check the following:\n\n"
+        "For payment issues, please check the following:\n"
         "- Confirm whether the payment amount was deducted.\n"
         "- Check whether the order was successfully created.\n"
         "- If payment was deducted but no order appears, contact support with your transaction reference."
     ),
     "recover_password": (
-        "To recover your password, please follow these steps:\n\n"
+        "To recover your password, please follow these steps:\n"
         "- Go to the login page.\n"
         "- Select Forgot Password.\n"
         "- Enter your registered email or phone number.\n"
         "- Follow the reset instructions sent to you."
     ),
     "complaint": (
-        "To submit a complaint, please prepare the following details:\n\n"
+        "To submit a complaint, please prepare the following details:\n"
         "- A short explanation of what happened.\n"
         "- Your order number, if available.\n"
         "- Screenshots or proof related to the issue.\n"
@@ -453,7 +453,7 @@ def build_response(intent: str, response: str) -> str:
     if intent in EMPATHY_PREFIXES:
         response = EMPATHY_PREFIXES[intent] + response
     if FOLLOW_UP_OPTIONS.get(intent):
-        response = response + "\n\nWould you like to continue with one of the options below?"
+        response = response + "\nWould you like to continue with one of the options below?"
     return response
 
 
