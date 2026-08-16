@@ -29,6 +29,31 @@ NON_SUPPORT_INTENTS = {
     "fallback",
 }
 
+MODEL_DISPLAY_NAMES = {
+    "svm": "KaiQi SVM",
+    "logistic": "Kathy Logistic Regression",
+}
+
+
+def load_metrics_table() -> pd.DataFrame:
+    rows = []
+    for model_name, display_name in MODEL_DISPLAY_NAMES.items():
+        metrics_path = MODEL_RESULT_DIRS[model_name] / f"{model_name}_metrics.json"
+        if metrics_path.exists():
+            metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+            rows.append(
+                {
+                    "Model": display_name,
+                    "Accuracy": metrics["accuracy"],
+                    "Precision": metrics["precision"],
+                    "Recall": metrics["recall"],
+                    "F1 Score": metrics["f1_score"],
+                    "Training Time (s)": metrics.get("training_time_seconds", 0),
+                    "Avg Prediction Time (ms)": metrics.get("average_prediction_time_ms", 0),
+                }
+            )
+    return pd.DataFrame(rows)
+
 st.set_page_config(
     page_title="ShopCare MY",
     layout="wide",
@@ -653,47 +678,80 @@ elif page == "Model Evaluation":
 
     if metrics_path.exists():
         metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+        st.subheader("Summary Metrics")
         cols = st.columns(4)
         cols[0].metric("Accuracy", f"{metrics['accuracy']:.4f}")
         cols[1].metric("Precision", f"{metrics['precision']:.4f}")
         cols[2].metric("Recall", f"{metrics['recall']:.4f}")
         cols[3].metric("F1 Score", f"{metrics['f1_score']:.4f}")
-        st.caption(
-            f"Average prediction time: {metrics.get('average_prediction_time_ms', 0):.4f} ms"
+
+        timing_df = pd.DataFrame(
+            [
+                {
+                    "Training Time (s)": metrics.get("training_time_seconds", 0),
+                    "Prediction Time (s)": metrics.get("prediction_time_seconds", 0),
+                    "Avg Prediction Time (ms)": metrics.get("average_prediction_time_ms", 0),
+                }
+            ]
         )
+        st.subheader("Speed Table")
+        st.dataframe(timing_df, use_container_width=True, hide_index=True)
+
+        metric_chart_df = pd.DataFrame(
+            {
+                "Metric": ["Accuracy", "Precision", "Recall", "F1 Score"],
+                "Score": [
+                    metrics["accuracy"],
+                    metrics["precision"],
+                    metrics["recall"],
+                    metrics["f1_score"],
+                ],
+            }
+        ).set_index("Metric")
+        st.subheader("Metric Chart")
+        st.bar_chart(metric_chart_df)
 
         if report_path.exists():
             st.subheader("Per-Intent Classification Report")
             st.caption("This table shows how well the model performs for each support intent.")
-            st.dataframe(pd.read_csv(report_path), use_container_width=True)
+            report_df = pd.read_csv(report_path)
+            st.dataframe(report_df, use_container_width=True, hide_index=True)
     else:
         st.info("Evaluation results are not generated yet.")
 
 elif page == "Model Comparison":
     st.header("Model Comparison")
     st.caption("Both models use the same dataset, preprocessing, TF-IDF settings, and train-test split for fair comparison.")
-    rows = []
-    for model_name in ["svm", "logistic"]:
-        metrics_path = MODEL_RESULT_DIRS[model_name] / f"{model_name}_metrics.json"
-        if metrics_path.exists():
-            metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
-            rows.append(
-                {
-                    "Model": model_name.upper(),
-                    "Accuracy": metrics["accuracy"],
-                    "Precision": metrics["precision"],
-                    "Recall": metrics["recall"],
-                    "F1 Score": metrics["f1_score"],
-                    "Avg Prediction Time (ms)": metrics.get("average_prediction_time_ms", 0),
-                }
-            )
 
-    if rows:
-        comparison_df = pd.DataFrame(rows)
+    comparison_df = load_metrics_table()
+    if not comparison_df.empty:
+        best_f1 = comparison_df.sort_values("F1 Score", ascending=False).iloc[0]
+        fastest = comparison_df.sort_values("Avg Prediction Time (ms)", ascending=True).iloc[0]
+
+        summary_cols = st.columns(3)
+        summary_cols[0].metric("Best F1 Model", best_f1["Model"], f"{best_f1['F1 Score']:.4f}")
+        summary_cols[1].metric("Highest Accuracy", best_f1["Model"], f"{best_f1['Accuracy']:.4f}")
+        summary_cols[2].metric("Fastest Prediction", fastest["Model"], f"{fastest['Avg Prediction Time (ms)']:.4f} ms")
+
         st.subheader("Overall Comparison")
-        st.dataframe(comparison_df, use_container_width=True)
-        st.subheader("Metric Chart")
+        display_df = comparison_df.copy()
+        for column in ["Accuracy", "Precision", "Recall", "F1 Score"]:
+            display_df[column] = display_df[column].map(lambda value: f"{value:.4f}")
+        display_df["Training Time (s)"] = display_df["Training Time (s)"].map(lambda value: f"{value:.4f}")
+        display_df["Avg Prediction Time (ms)"] = display_df["Avg Prediction Time (ms)"].map(lambda value: f"{value:.6f}")
+        st.dataframe(display_df, use_container_width=True, hide_index=True)
+
+        st.subheader("Classification Metrics Chart")
         st.bar_chart(comparison_df.set_index("Model")[["Accuracy", "Precision", "Recall", "F1 Score"]])
+
+        st.subheader("Speed Comparison Chart")
+        st.bar_chart(comparison_df.set_index("Model")[["Training Time (s)", "Avg Prediction Time (ms)"]])
+
+        st.subheader("Conclusion")
+        st.write(
+            f"{best_f1['Model']} performs better overall because it has the highest F1 Score "
+            f"({best_f1['F1 Score']:.4f}) and Accuracy ({best_f1['Accuracy']:.4f})."
+        )
     else:
         st.info("Comparison results are not generated yet.")
 
