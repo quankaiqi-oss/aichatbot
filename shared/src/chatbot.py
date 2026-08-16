@@ -23,19 +23,18 @@ FALLBACK_RESPONSE = (
 )
 
 CLARIFICATION_RESPONSE = (
-    "I can help, but I need one more detail. Is your issue about delivery delay, "
-    "order tracking, refund, cancellation, payment, account login, or contacting support?"
+    "I can help, but I need one more detail first. Which area is the problem related to?"
 )
 
 CONVERSATIONAL_RESPONSES = {
-    "greeting": "Hi, I am ShopCare MY. What online shopping issue can I help you with today?",
-    "thanks": "You are welcome. I am glad I could help.",
-    "goodbye": "Thanks for chatting with ShopCare MY. Hope your issue gets solved soon.",
+    "greeting": "Hi, I am ShopCare MY. Tell me what happened and I will try to guide you.",
+    "thanks": "You are welcome. Hope the steps help.",
+    "goodbye": "Thanks for chatting with ShopCare MY. Hope everything gets sorted soon.",
     "capability": (
         "I can help with order tracking, refunds, payment issues, delivery delays, "
         "cancellations, account access, vouchers, invoices, complaints, and contacting support."
     ),
-    "positive_confirmation": "Okay, let us continue with this issue. What detail do you want to check next?",
+    "positive_confirmation": "Okay. What would you like to check next?",
     "negative_confirmation": "No problem. Tell me the correct issue, such as refund, delivery, payment, or account login.",
 }
 
@@ -115,24 +114,20 @@ FOLLOW_UP_OPTIONS = {
 
 INTENT_RESPONSES = {
     "track_order": (
-        "Sure, I can guide you. First, open My Orders and select the order. Then check "
-        "the delivery status and tracking number. If the parcel is already late, prepare "
-        "your order number before contacting support."
+        "Sure. Open My Orders, select the order, then check the delivery status and tracking "
+        "number. If it is already late, prepare your order number before contacting support."
     ),
     "track_refund": (
-        "You can check your refund status from the refund or return section in "
-        "your account. If the refund has not been updated, please prepare your "
-        "order number, refund request date, and payment method before contacting support."
+        "You can check the refund status from the refund or return section in your account. "
+        "If there is no update, prepare your order number, refund request date, and payment method."
     ),
     "get_refund": (
-        "Sure, I can help with that. Open My Orders, choose the item, then select Refund "
-        "or Return. Submit the reason and upload proof if needed, such as photos for a "
-        "damaged or wrong item."
+        "Sure, I can help with that. Open My Orders, choose the item, then select Refund or "
+        "Return. Submit the reason and upload proof if needed."
     ),
     "cancel_order": (
-        "To cancel an order, go to My Orders, choose the order, and select the cancel "
-        "option if it is still available. If the order has already shipped, you may need "
-        "to request a return or contact customer support."
+        "Go to My Orders, choose the order, and select Cancel if the option is still available. "
+        "If it has already shipped, you may need to request a return or contact support."
     ),
     "payment_issue": (
         "Please check two things first: whether the amount was deducted and whether the "
@@ -140,12 +135,12 @@ INTENT_RESPONSES = {
         "with your transaction reference."
     ),
     "recover_password": (
-        "Use the Forgot Password option on the login page. Enter your registered email or "
-        "phone number, then follow the reset instructions sent to you."
+        "Use Forgot Password on the login page. Enter your registered email or phone number, "
+        "then follow the reset instructions."
     ),
     "complaint": (
-        "I am sorry about the issue. Please describe what happened and include your order "
-        "number if available. The support team can then review the case and assist you further."
+        "Please describe what happened and include your order number if available. The support "
+        "team can review the case and assist you further."
     ),
     "delivery_period": (
         "Delivery time depends on the courier, seller processing time, and your location. "
@@ -426,9 +421,6 @@ def format_response(response: str) -> str:
 def build_response(intent: str, response: str) -> str:
     if intent in EMPATHY_PREFIXES:
         response = EMPATHY_PREFIXES[intent] + response
-    options = FOLLOW_UP_OPTIONS.get(intent, [])
-    if options:
-        response = response + "\n\nYou can also choose: " + ", ".join(options) + "."
     return response
 
 
