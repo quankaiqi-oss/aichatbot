@@ -60,9 +60,9 @@ def load_metrics_table() -> pd.DataFrame:
 
 def interactive_metric_chart(chart_df: pd.DataFrame, title: str):
     long_df = chart_df.melt(id_vars="Model", var_name="Metric", value_name="Score")
-    nearest = alt.selection_point(nearest=True, on="pointerover", fields=["Model", "Metric"], empty=False)
-    base = (
+    bars = (
         alt.Chart(long_df)
+        .mark_bar(cornerRadiusTopLeft=5, cornerRadiusTopRight=5)
         .encode(
             x=alt.X(
                 "Metric:N",
@@ -90,9 +90,7 @@ def interactive_metric_chart(chart_df: pd.DataFrame, title: str):
         )
         .properties(height=320, title=alt.TitleParams(text=title, color="#5C4444", fontSize=15))
     )
-    bars = base.mark_bar(cornerRadiusTopLeft=5, cornerRadiusTopRight=5)
-    points = base.mark_circle(size=100).encode(opacity=alt.condition(nearest, alt.value(1), alt.value(0)))
-    return (bars + points).configure_axis(
+    return bars.configure_axis(
         labelColor="#5C4444",
         titleColor="#5C4444",
         gridColor="#EDE7D5",
@@ -138,28 +136,25 @@ def interactive_single_metric_chart(summary_df: pd.DataFrame, title: str):
 
 
 def interactive_speed_chart(speed_df: pd.DataFrame):
-    long_df = speed_df.melt(
-        id_vars="Model",
-        value_vars=["Training Time (s)", "Avg Prediction Time (ms)"],
-        var_name="Metric",
-        value_name="Value",
-    )
+    chart_df = speed_df.sort_values("Avg Prediction Time (ms)", ascending=True)
     chart = (
-        alt.Chart(long_df)
-        .mark_bar(cornerRadiusTopRight=6, cornerRadiusBottomRight=6, height=24)
+        alt.Chart(chart_df)
+        .mark_bar(cornerRadiusTopRight=6, cornerRadiusBottomRight=6, height=28)
         .encode(
-            y=alt.Y("Model:N", sort="x", title=None, axis=alt.Axis(labelLimit=170)),
-            x=alt.X("Value:Q", title=None, axis=alt.Axis(grid=True, gridColor="#EDE7D5")),
+            y=alt.Y("Model:N", sort=list(chart_df["Model"]), title=None, axis=alt.Axis(labelLimit=190)),
+            x=alt.X(
+                "Avg Prediction Time (ms):Q",
+                title="Average Prediction Time (ms)",
+                axis=alt.Axis(grid=True, gridColor="#EDE7D5"),
+            ),
             color=alt.Color("Model:N", scale=alt.Scale(range=["#5C4444", "#b4cfcb"]), legend=None),
             tooltip=[
                 alt.Tooltip("Model:N"),
-                alt.Tooltip("Metric:N"),
-                alt.Tooltip("Value:Q", format=".6f"),
+                alt.Tooltip("Avg Prediction Time (ms):Q", format=".6f"),
+                alt.Tooltip("Training Time (s):Q", format=".4f"),
             ],
         )
-        .properties(height=150)
-        .facet(column=alt.Column("Metric:N", title=None, header=alt.Header(labelColor="#5C4444", labelFontSize=12)))
-        .resolve_scale(x="independent")
+        .properties(height=230, title=alt.TitleParams(text="Prediction Speed", color="#5C4444", fontSize=15))
         .configure_axis(labelColor="#5C4444", titleColor="#5C4444")
         .configure_view(stroke=None)
     )
@@ -335,6 +330,12 @@ st.markdown(
             font-size: 1.9rem !important;
             line-height: 1.18 !important;
             margin-bottom: 0.8rem !important;
+        }
+
+        .app-hero h1 {
+            color: #ffffff !important;
+            font-size: 1.62rem !important;
+            margin-bottom: 0 !important;
         }
 
         h2 {
@@ -1032,21 +1033,18 @@ elif page == "Model Comparison":
                 "Avg Prediction Time (ms)",
                 ascending=True,
             )
-            speed_table_col, speed_chart_col = st.columns([1, 1])
-            with speed_table_col:
-                st.caption("Sortable table. Default view is sorted by prediction speed.")
-                st.dataframe(
-                    speed_table,
-                    use_container_width=True,
-                    hide_index=True,
-                    column_config={
-                        "Training Time (s)": st.column_config.NumberColumn(format="%.4f"),
-                        "Avg Prediction Time (ms)": st.column_config.NumberColumn(format="%.6f"),
-                    },
-                )
-            with speed_chart_col:
-                st.caption("Hover over a bar to inspect the exact timing.")
-                st.altair_chart(interactive_speed_chart(comparison_df), use_container_width=True)
+            st.caption("Sortable table. Default view is sorted by prediction speed.")
+            st.dataframe(
+                speed_table,
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "Training Time (s)": st.column_config.NumberColumn(format="%.4f"),
+                    "Avg Prediction Time (ms)": st.column_config.NumberColumn(format="%.6f"),
+                },
+            )
+            st.caption("Hover over a bar to inspect the exact timing.")
+            st.altair_chart(interactive_speed_chart(comparison_df), use_container_width=True)
     else:
         st.info("Comparison results are not generated yet.")
 
