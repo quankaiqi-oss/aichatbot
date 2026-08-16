@@ -496,21 +496,6 @@ st.markdown(
             font-size: 0.78rem;
         }
 
-        .analysis-card {
-            background: rgba(255, 255, 255, 0.88);
-            border: 1px solid #d8d2c3;
-            border-radius: 10px;
-            padding: 1rem;
-            box-shadow: 0 8px 20px rgba(92, 68, 68, 0.04);
-            margin-bottom: 1rem;
-        }
-
-        .analysis-card h3 {
-            margin: 0 0 0.72rem 0;
-            font-size: 1rem;
-            color: var(--ink);
-        }
-
         .clean-table {
             width: 100%;
             border-collapse: collapse;
@@ -864,50 +849,31 @@ elif page == "Model Evaluation":
             }
         )
 
-        card1, card2, card3 = st.columns(3)
-        card1.metric("Selected Model", selected_label)
-        card2.metric("F1 Score", f"{metrics['f1_score']:.4f}")
-        card3.metric("Avg Prediction", f"{metrics.get('average_prediction_time_ms', 0):.6f} ms")
+        top1, top2, top3, top4 = st.columns(4)
+        top1.metric("Model", selected_label)
+        top2.metric("Accuracy", f"{metrics['accuracy']:.4f}")
+        top3.metric("F1 Score", f"{metrics['f1_score']:.4f}")
+        top4.metric("Avg Prediction", f"{metrics.get('average_prediction_time_ms', 0):.6f} ms")
 
-        left_col, right_col = st.columns([1.08, 1])
-        with left_col:
-            with st.container(border=True):
-                st.subheader("Metric Table")
-                st.caption("Sortable table. Click a column header to sort.")
-                st.dataframe(
-                    sorted_summary_df,
-                    use_container_width=True,
-                    hide_index=True,
-                    column_config={"Score": st.column_config.NumberColumn(format="%.4f")},
-                )
+        st.divider()
 
-            with st.container(border=True):
-                st.subheader("Speed Table")
-                st.caption("Sortable table. Click a column header to sort.")
-                st.dataframe(
-                    speed_df.sort_values("Value", ascending=True),
-                    use_container_width=True,
-                    hide_index=True,
-                    column_config={"Value": st.column_config.NumberColumn(format="%.6f")},
-                )
+        with st.container(border=True):
+            st.subheader("Performance Overview")
+            st.caption("Interactive chart. Hover for values, drag or scroll to move/zoom.")
+            st.altair_chart(
+                interactive_single_metric_chart(summary_df, f"{selected_label} Metrics"),
+                use_container_width=True,
+            )
 
-        with right_col:
-            with st.container(border=True):
-                st.subheader("Interactive Metric Chart")
-                st.caption("Hover for values. Drag or scroll to move/zoom.")
-                st.altair_chart(
-                    interactive_single_metric_chart(summary_df, f"{selected_label} Metrics"),
-                    use_container_width=True,
-                )
+        table_tab, speed_tab = st.tabs(["Intent Report", "Metric & Speed Tables"])
 
         if report_path.exists():
-            report_df = pd.read_csv(report_path)
-            report_df = report_df.rename(columns={report_df.columns[0]: "Intent"})
-            if "f1-score" in report_df.columns:
-                report_df = report_df.sort_values("f1-score", ascending=False)
-            with st.container(border=True):
-                st.subheader("Per-Intent Classification Report")
-                st.caption("Sortable report. Default view is sorted by F1 score.")
+            with table_tab:
+                report_df = pd.read_csv(report_path)
+                report_df = report_df.rename(columns={report_df.columns[0]: "Intent"})
+                if "f1-score" in report_df.columns:
+                    report_df = report_df.sort_values("f1-score", ascending=False)
+                st.caption("Sortable table. Default view is sorted by F1 score.")
                 st.dataframe(
                     report_df,
                     use_container_width=True,
@@ -918,6 +884,25 @@ elif page == "Model Evaluation":
                         "f1-score": st.column_config.NumberColumn(format="%.4f"),
                         "support": st.column_config.NumberColumn(format="%.0f"),
                     },
+                )
+
+        with speed_tab:
+            metric_col, speed_col = st.columns(2)
+            with metric_col:
+                st.caption("Metrics sorted from highest score to lowest score.")
+                st.dataframe(
+                    sorted_summary_df,
+                    use_container_width=True,
+                    hide_index=True,
+                    column_config={"Score": st.column_config.NumberColumn(format="%.4f")},
+                )
+            with speed_col:
+                st.caption("Speed values sorted from fastest to slowest.")
+                st.dataframe(
+                    speed_df.sort_values("Value", ascending=True),
+                    use_container_width=True,
+                    hide_index=True,
+                    column_config={"Value": st.column_config.NumberColumn(format="%.6f")},
                 )
     else:
         st.info("Evaluation results are not generated yet.")
@@ -932,53 +917,53 @@ elif page == "Model Comparison":
         best_f1 = comparison_df.iloc[0]
         fastest = comparison_df.sort_values("Avg Prediction Time (ms)", ascending=True).iloc[0]
 
-        card1, card2, card3 = st.columns(3)
-        card1.metric("Best Overall", best_f1["Model"], f"F1 {best_f1['F1 Score']:.4f}")
-        card2.metric("Highest Accuracy", best_f1["Model"], f"{best_f1['Accuracy']:.4f}")
-        card3.metric("Fastest Prediction", fastest["Model"], f"{fastest['Avg Prediction Time (ms)']:.6f} ms")
+        top1, top2, top3 = st.columns(3)
+        top1.metric("Best Overall", best_f1["Model"], f"F1 {best_f1['F1 Score']:.4f}")
+        top2.metric("Highest Accuracy", best_f1["Model"], f"{best_f1['Accuracy']:.4f}")
+        top3.metric("Fastest Prediction", fastest["Model"], f"{fastest['Avg Prediction Time (ms)']:.6f} ms")
 
-        left_col, right_col = st.columns([1.08, 1])
-        with left_col:
-            with st.container(border=True):
-                st.subheader("Sortable Comparison Table")
-                st.caption("Default sorting is by F1 Score. Click any column header to sort.")
-                st.dataframe(
-                    comparison_df,
-                    use_container_width=True,
-                    hide_index=True,
-                    column_config={
-                        "Accuracy": st.column_config.NumberColumn(format="%.4f"),
-                        "Precision": st.column_config.NumberColumn(format="%.4f"),
-                        "Recall": st.column_config.NumberColumn(format="%.4f"),
-                        "F1 Score": st.column_config.NumberColumn(format="%.4f"),
-                        "Training Time (s)": st.column_config.NumberColumn(format="%.4f"),
-                        "Avg Prediction Time (ms)": st.column_config.NumberColumn(format="%.6f"),
-                    },
-                )
-                st.caption(
-                    f"Best overall model: {best_f1['Model']} "
-                    f"(F1 Score {best_f1['F1 Score']:.4f}, Accuracy {best_f1['Accuracy']:.4f})."
-                )
+        st.divider()
 
-        with right_col:
+        chart_tab, table_tab, speed_tab = st.tabs(["Classification Chart", "Comparison Table", "Speed View"])
+
+        with chart_tab:
             with st.container(border=True):
-                st.subheader("Interactive Classification Chart")
-                st.caption("Hover for values. Drag or scroll to move/zoom.")
+                st.subheader("Interactive Classification Comparison")
+                st.caption("Hover for values, drag or scroll to move/zoom.")
                 metric_chart_df = comparison_df[["Model", "Accuracy", "Precision", "Recall", "F1 Score"]]
                 st.altair_chart(
-                    interactive_metric_chart(metric_chart_df, "Classification Comparison"),
+                    interactive_metric_chart(metric_chart_df, "Classification Metrics"),
                     use_container_width=True,
                 )
 
-        speed_left, speed_right = st.columns([1.08, 1])
-        with speed_left:
+        with table_tab:
+            st.caption("Sortable table. Default view is sorted by F1 Score.")
+            st.dataframe(
+                comparison_df,
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "Accuracy": st.column_config.NumberColumn(format="%.4f"),
+                    "Precision": st.column_config.NumberColumn(format="%.4f"),
+                    "Recall": st.column_config.NumberColumn(format="%.4f"),
+                    "F1 Score": st.column_config.NumberColumn(format="%.4f"),
+                    "Training Time (s)": st.column_config.NumberColumn(format="%.4f"),
+                    "Avg Prediction Time (ms)": st.column_config.NumberColumn(format="%.6f"),
+                },
+            )
+            st.caption(
+                f"Best overall model: {best_f1['Model']} "
+                f"(F1 Score {best_f1['F1 Score']:.4f}, Accuracy {best_f1['Accuracy']:.4f})."
+            )
+
+        with speed_tab:
             speed_table = comparison_df[["Model", "Training Time (s)", "Avg Prediction Time (ms)"]].sort_values(
                 "Avg Prediction Time (ms)",
                 ascending=True,
             )
-            with st.container(border=True):
-                st.subheader("Sortable Speed Table")
-                st.caption("Default sorting is by average prediction time.")
+            speed_table_col, speed_chart_col = st.columns([1, 1])
+            with speed_table_col:
+                st.caption("Sortable table. Default view is sorted by prediction speed.")
                 st.dataframe(
                     speed_table,
                     use_container_width=True,
@@ -988,10 +973,8 @@ elif page == "Model Comparison":
                         "Avg Prediction Time (ms)": st.column_config.NumberColumn(format="%.6f"),
                     },
                 )
-        with speed_right:
-            with st.container(border=True):
-                st.subheader("Interactive Speed Chart")
-                st.caption("Hover for values. Drag or scroll to move/zoom.")
+            with speed_chart_col:
+                st.caption("Interactive chart. Hover for values, drag or scroll to move/zoom.")
                 st.altair_chart(interactive_speed_chart(comparison_df), use_container_width=True)
     else:
         st.info("Comparison results are not generated yet.")
