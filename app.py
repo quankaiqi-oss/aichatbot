@@ -225,6 +225,8 @@ st.markdown(
             align-items: flex-start;
             margin: 1.15rem 0;
             width: min(1040px, 100%);
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .chat-row.user {
@@ -287,6 +289,8 @@ st.markdown(
             border-radius: 7px;
             background: rgba(255, 255, 255, 0.88);
             max-width: 760px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         div[data-testid="stExpander"] details > summary {
@@ -350,7 +354,7 @@ st.markdown(
         }
 
         [data-testid="stChatInput"] {
-            max-width: 1080px !important;
+            max-width: 1040px !important;
             margin-left: auto !important;
             margin-right: auto !important;
         }
@@ -369,7 +373,7 @@ st.markdown(
             padding: 0.35rem 0.45rem !important;
             box-shadow: 0 8px 20px rgba(92, 68, 68, 0.045) !important;
             width: 100% !important;
-            max-width: 1080px !important;
+            max-width: 1040px !important;
             margin-left: auto !important;
             margin-right: auto !important;
         }
