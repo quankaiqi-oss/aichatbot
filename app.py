@@ -266,6 +266,23 @@ st.markdown(
             white-space: pre-wrap;
         }
 
+        .chat-message-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.28rem;
+            max-width: min(720px, 72%);
+        }
+
+        .chat-meta {
+            color: #8d817b;
+            font-size: 0.74rem;
+            line-height: 1.25;
+            padding-left: 0.18rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         .chat-row.assistant .chat-bubble {
             background: #ffffff;
             border-color: #d8d2c3;
@@ -505,10 +522,27 @@ if page == "Chatbot":
             </div>
             """
         else:
+            meta_html = ""
+            if message.get("model") and message.get("intent"):
+                confidence = message.get("confidence")
+                confidence_text = "N/A" if confidence is None else f"{confidence:.4f}"
+                model_intent = message.get("model_intent") or "N/A"
+                meta_text = (
+                    f"Model: {message['model'].upper()} | "
+                    f"Final intent: {message['intent']} | "
+                    f"Model intent: {model_intent} | "
+                    f"Confidence: {confidence_text}"
+                )
+                if message.get("used_fallback") and message.get("fallback_reason"):
+                    meta_text += f" | {message['fallback_reason']}"
+                meta_html = f'<div class="chat-meta">{html.escape(meta_text)}</div>'
             message_html = f"""
             <div class="chat-row assistant">
                 <div class="chat-avatar">{avatar}</div>
-                <div class="chat-bubble">{safe_content}</div>
+                <div class="chat-message-stack">
+                    <div class="chat-bubble">{safe_content}</div>
+                    {meta_html}
+                </div>
             </div>
             """
         st.markdown(message_html, unsafe_allow_html=True)
@@ -583,22 +617,6 @@ if page == "Chatbot":
 
     if "last_prediction" in st.session_state:
         result = st.session_state["last_prediction"]
-        with st.expander("Model details for evaluation"):
-            confidence = result.get("confidence")
-            confidence_text = "N/A" if confidence is None else f"{confidence:.4f}"
-            model_intent = result.get("model_intent") or "N/A"
-            detail_html = f"""
-            <div class="model-detail-grid">
-                <div class="model-detail-item"><span>Selected model</span><strong>{html.escape(result["model"].upper())}</strong></div>
-                <div class="model-detail-item"><span>Confidence</span><strong>{html.escape(confidence_text)}</strong></div>
-                <div class="model-detail-item"><span>Final intent</span><strong>{html.escape(result["intent"])}</strong></div>
-                <div class="model-detail-item"><span>Model intent</span><strong>{html.escape(model_intent)}</strong></div>
-            </div>
-            """
-            st.markdown(detail_html, unsafe_allow_html=True)
-            if result.get("used_fallback"):
-                st.warning(result.get("fallback_reason") or "Fallback or clarification was used.")
-
         with st.expander("Rate the latest response"):
             with st.form("feedback_form"):
                 rating = st.slider("How useful was this response?", 1, 5, 4)
