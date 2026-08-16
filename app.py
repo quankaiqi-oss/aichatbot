@@ -4,6 +4,7 @@ import csv
 import html
 import json
 
+import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
 
@@ -34,6 +35,8 @@ MODEL_DISPLAY_NAMES = {
     "logistic": "Kathy Logistic Regression",
 }
 
+CHART_COLORS = ["#5C4444", "#b4cfcb", "#EDE7D5", "#8f7676"]
+
 
 def load_metrics_table() -> pd.DataFrame:
     rows = []
@@ -53,6 +56,47 @@ def load_metrics_table() -> pd.DataFrame:
                 }
             )
     return pd.DataFrame(rows)
+
+
+def draw_metric_chart(chart_df: pd.DataFrame, title: str):
+    fig, ax = plt.subplots(figsize=(7.2, 3.8))
+    fig.patch.set_facecolor("#ffffff")
+    ax.set_facecolor("#ffffff")
+    chart_df.plot(kind="bar", ax=ax, color=CHART_COLORS[: len(chart_df.columns)], width=0.72)
+    ax.set_title(title, color="#5C4444", fontsize=12, fontweight="bold", pad=12)
+    ax.set_ylim(0, 1.04)
+    ax.tick_params(axis="x", rotation=0, colors="#5C4444", labelsize=9)
+    ax.tick_params(axis="y", colors="#756464", labelsize=8)
+    ax.grid(axis="y", color="#EDE7D5", linewidth=0.8)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.spines["left"].set_color("#d8d2c3")
+    ax.spines["bottom"].set_color("#d8d2c3")
+    ax.legend(frameon=False, fontsize=8, labelcolor="#5C4444", loc="lower right")
+    fig.tight_layout()
+    return fig
+
+
+def draw_speed_chart(chart_df: pd.DataFrame):
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.6))
+    fig.patch.set_facecolor("#ffffff")
+    speed_columns = ["Training Time (s)", "Avg Prediction Time (ms)"]
+    titles = ["Training Time", "Prediction Time"]
+
+    for ax, column, title in zip(axes, speed_columns, titles):
+        sorted_df = chart_df.sort_values(column, ascending=True)
+        ax.barh(sorted_df["Model"], sorted_df[column], color=["#b4cfcb", "#5C4444"])
+        ax.set_title(title, color="#5C4444", fontsize=11, fontweight="bold", pad=10)
+        ax.tick_params(axis="x", colors="#756464", labelsize=8)
+        ax.tick_params(axis="y", colors="#5C4444", labelsize=8)
+        ax.grid(axis="x", color="#EDE7D5", linewidth=0.8)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["left"].set_color("#d8d2c3")
+        ax.spines["bottom"].set_color("#d8d2c3")
+
+    fig.tight_layout()
+    return fig
 
 st.set_page_config(
     page_title="ShopCare MY",
@@ -678,26 +722,7 @@ elif page == "Model Evaluation":
 
     if metrics_path.exists():
         metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
-        st.subheader("Summary Metrics")
-        cols = st.columns(4)
-        cols[0].metric("Accuracy", f"{metrics['accuracy']:.4f}")
-        cols[1].metric("Precision", f"{metrics['precision']:.4f}")
-        cols[2].metric("Recall", f"{metrics['recall']:.4f}")
-        cols[3].metric("F1 Score", f"{metrics['f1_score']:.4f}")
-
-        timing_df = pd.DataFrame(
-            [
-                {
-                    "Training Time (s)": metrics.get("training_time_seconds", 0),
-                    "Prediction Time (s)": metrics.get("prediction_time_seconds", 0),
-                    "Avg Prediction Time (ms)": metrics.get("average_prediction_time_ms", 0),
-                }
-            ]
-        )
-        st.subheader("Speed Table")
-        st.dataframe(timing_df, use_container_width=True, hide_index=True)
-
-        metric_chart_df = pd.DataFrame(
+        summary_df = pd.DataFrame(
             {
                 "Metric": ["Accuracy", "Precision", "Recall", "F1 Score"],
                 "Score": [
@@ -707,14 +732,41 @@ elif page == "Model Evaluation":
                     metrics["f1_score"],
                 ],
             }
-        ).set_index("Metric")
-        st.subheader("Metric Chart")
-        st.bar_chart(metric_chart_df)
+        )
+        speed_df = pd.DataFrame(
+            {
+                "Metric": ["Training Time (s)", "Prediction Time (s)", "Avg Prediction Time (ms)"],
+                "Value": [
+                    metrics.get("training_time_seconds", 0),
+                    metrics.get("prediction_time_seconds", 0),
+                    metrics.get("average_prediction_time_ms", 0),
+                ],
+            }
+        )
+
+        left_col, right_col = st.columns([1.08, 1])
+        with left_col:
+            st.subheader("Metric Table")
+            sorted_summary_df = summary_df.sort_values("Score", ascending=False)
+            display_summary_df = sorted_summary_df.copy()
+            display_summary_df["Score"] = display_summary_df["Score"].map(lambda value: f"{value:.4f}")
+            st.dataframe(display_summary_df, use_container_width=True, hide_index=True)
+
+            st.subheader("Speed Table")
+            display_speed_df = speed_df.copy()
+            display_speed_df["Value"] = display_speed_df["Value"].map(lambda value: f"{value:.6f}")
+            st.dataframe(display_speed_df, use_container_width=True, hide_index=True)
+
+        with right_col:
+            chart_df = summary_df.set_index("Metric").T
+            st.pyplot(draw_metric_chart(chart_df, f"{selected_label} Metrics"), use_container_width=True)
 
         if report_path.exists():
             st.subheader("Per-Intent Classification Report")
-            st.caption("This table shows how well the model performs for each support intent.")
             report_df = pd.read_csv(report_path)
+            report_df = report_df.rename(columns={report_df.columns[0]: "Intent"})
+            if "f1-score" in report_df.columns:
+                report_df = report_df.sort_values("f1-score", ascending=False)
             st.dataframe(report_df, use_container_width=True, hide_index=True)
     else:
         st.info("Evaluation results are not generated yet.")
@@ -725,33 +777,40 @@ elif page == "Model Comparison":
 
     comparison_df = load_metrics_table()
     if not comparison_df.empty:
-        best_f1 = comparison_df.sort_values("F1 Score", ascending=False).iloc[0]
-        fastest = comparison_df.sort_values("Avg Prediction Time (ms)", ascending=True).iloc[0]
+        comparison_df = comparison_df.sort_values("F1 Score", ascending=False)
+        best_f1 = comparison_df.iloc[0]
 
-        summary_cols = st.columns(3)
-        summary_cols[0].metric("Best F1 Model", best_f1["Model"], f"{best_f1['F1 Score']:.4f}")
-        summary_cols[1].metric("Highest Accuracy", best_f1["Model"], f"{best_f1['Accuracy']:.4f}")
-        summary_cols[2].metric("Fastest Prediction", fastest["Model"], f"{fastest['Avg Prediction Time (ms)']:.4f} ms")
+        left_col, right_col = st.columns([1.08, 1])
+        with left_col:
+            st.subheader("Sorted Comparison Table")
+            display_df = comparison_df.copy()
+            for column in ["Accuracy", "Precision", "Recall", "F1 Score"]:
+                display_df[column] = display_df[column].map(lambda value: f"{value:.4f}")
+            display_df["Training Time (s)"] = display_df["Training Time (s)"].map(lambda value: f"{value:.4f}")
+            display_df["Avg Prediction Time (ms)"] = display_df["Avg Prediction Time (ms)"].map(lambda value: f"{value:.6f}")
+            st.dataframe(display_df, use_container_width=True, hide_index=True)
+            st.caption(
+                f"Best overall model: {best_f1['Model']} "
+                f"(F1 Score {best_f1['F1 Score']:.4f}, Accuracy {best_f1['Accuracy']:.4f})."
+            )
 
-        st.subheader("Overall Comparison")
-        display_df = comparison_df.copy()
-        for column in ["Accuracy", "Precision", "Recall", "F1 Score"]:
-            display_df[column] = display_df[column].map(lambda value: f"{value:.4f}")
-        display_df["Training Time (s)"] = display_df["Training Time (s)"].map(lambda value: f"{value:.4f}")
-        display_df["Avg Prediction Time (ms)"] = display_df["Avg Prediction Time (ms)"].map(lambda value: f"{value:.6f}")
-        st.dataframe(display_df, use_container_width=True, hide_index=True)
+        with right_col:
+            metric_chart_df = comparison_df.set_index("Model")[["Accuracy", "Precision", "Recall", "F1 Score"]]
+            st.pyplot(draw_metric_chart(metric_chart_df, "Classification Comparison"), use_container_width=True)
 
-        st.subheader("Classification Metrics Chart")
-        st.bar_chart(comparison_df.set_index("Model")[["Accuracy", "Precision", "Recall", "F1 Score"]])
-
-        st.subheader("Speed Comparison Chart")
-        st.bar_chart(comparison_df.set_index("Model")[["Training Time (s)", "Avg Prediction Time (ms)"]])
-
-        st.subheader("Conclusion")
-        st.write(
-            f"{best_f1['Model']} performs better overall because it has the highest F1 Score "
-            f"({best_f1['F1 Score']:.4f}) and Accuracy ({best_f1['Accuracy']:.4f})."
-        )
+        st.subheader("Speed Comparison")
+        speed_left, speed_right = st.columns([1.08, 1])
+        with speed_left:
+            speed_table = comparison_df[["Model", "Training Time (s)", "Avg Prediction Time (ms)"]].sort_values(
+                "Avg Prediction Time (ms)",
+                ascending=True,
+            )
+            speed_display_df = speed_table.copy()
+            speed_display_df["Training Time (s)"] = speed_display_df["Training Time (s)"].map(lambda value: f"{value:.4f}")
+            speed_display_df["Avg Prediction Time (ms)"] = speed_display_df["Avg Prediction Time (ms)"].map(lambda value: f"{value:.6f}")
+            st.dataframe(speed_display_df, use_container_width=True, hide_index=True)
+        with speed_right:
+            st.pyplot(draw_speed_chart(comparison_df), use_container_width=True)
     else:
         st.info("Comparison results are not generated yet.")
 
