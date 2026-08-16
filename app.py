@@ -280,8 +280,16 @@ st.markdown(
 
         div[data-testid="stExpander"] {
             border: 1px solid var(--line);
-            border-radius: 8px;
+            border-radius: 7px;
             background: rgba(255, 253, 248, 0.72);
+            max-width: 760px;
+        }
+
+        div[data-testid="stExpander"] details > summary {
+            min-height: 2.25rem;
+            padding-top: 0.35rem !important;
+            padding-bottom: 0.35rem !important;
+            font-size: 0.88rem;
         }
 
         [data-testid="stDataFrame"] {
