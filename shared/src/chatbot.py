@@ -270,11 +270,20 @@ INTENT_RESPONSES = {
 def conversational_intent(cleaned_text: str) -> str | None:
     if cleaned_text in ["hi", "hello", "hey", "good morning", "good afternoon", "good evening"]:
         return "greeting"
-    if cleaned_text in ["thanks", "thank you", "tq", "thx"]:
+    if cleaned_text in [
+        "thanks",
+        "thank",
+        "thank you",
+        "thankyou",
+        "tq",
+        "thx",
+        "appreciate it",
+        "thanks a lot",
+    ]:
         return "thanks"
-    if cleaned_text in ["bye", "goodbye", "see you"]:
+    if cleaned_text in ["bye", "goodbye", "see you", "see ya", "done"]:
         return "goodbye"
-    if cleaned_text in ["ok", "okay", "yes", "yup", "sure"]:
+    if cleaned_text in ["ok", "okay", "yes", "yup", "sure", "alright"]:
         return "positive_confirmation"
     if cleaned_text in ["no", "nope", "not this"]:
         return "negative_confirmation"
