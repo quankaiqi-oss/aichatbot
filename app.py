@@ -61,7 +61,7 @@ st.markdown(
         .block-container {
             padding-top: 2.2rem;
             padding-bottom: 3rem;
-            max-width: 1360px;
+            max-width: 1080px;
             padding-left: 3rem;
             padding-right: 3rem;
         }
@@ -131,7 +131,7 @@ st.markdown(
             border-radius: 10px;
             padding: 1.15rem 1.35rem;
             margin-bottom: 1.65rem;
-            max-width: 1080px;
+            max-width: 900px;
             box-shadow:
                 0 10px 24px rgba(92, 68, 68, 0.12),
                 inset 0 1px 0 rgba(255, 255, 255, 0.12);
@@ -224,7 +224,7 @@ st.markdown(
             gap: 0.65rem;
             align-items: flex-start;
             margin: 1.15rem 0;
-            width: min(1040px, 100%);
+            width: min(820px, 100%);
             margin-left: auto;
             margin-right: auto;
         }
@@ -256,7 +256,7 @@ st.markdown(
         .chat-bubble {
             display: inline-block;
             width: fit-content;
-            max-width: min(760px, 76%);
+            max-width: min(620px, 78%);
             padding: 0.95rem 1.08rem;
             border-radius: 10px;
             border: 1px solid #d8d2c3;
@@ -275,7 +275,16 @@ st.markdown(
             background: #b4cfcb;
             border-color: #a4c3be;
             color: #000000;
-            max-width: min(640px, 64%);
+            max-width: min(520px, 66%);
+        }
+
+        .chat-control-area {
+            width: min(820px, 100%);
+            margin: 0.5rem auto 0 auto;
+        }
+
+        .chat-control-area .stButton > button {
+            min-width: 10.5rem;
         }
 
         .quick-reply-title {
@@ -288,7 +297,7 @@ st.markdown(
             border: 1px solid var(--line);
             border-radius: 7px;
             background: rgba(255, 255, 255, 0.88);
-            max-width: 760px;
+            max-width: 820px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -354,7 +363,7 @@ st.markdown(
         }
 
         [data-testid="stChatInput"] {
-            max-width: 1040px !important;
+            max-width: 820px !important;
             margin-left: auto !important;
             margin-right: auto !important;
         }
@@ -373,7 +382,7 @@ st.markdown(
             padding: 0.35rem 0.45rem !important;
             box-shadow: 0 8px 20px rgba(92, 68, 68, 0.045) !important;
             width: 100% !important;
-            max-width: 1040px !important;
+            max-width: 820px !important;
             margin-left: auto !important;
             margin-right: auto !important;
         }
@@ -496,10 +505,12 @@ if page == "Chatbot":
     if "last_prediction" in st.session_state:
         suggestions = st.session_state["last_prediction"].get("follow_up_options", [])
         if suggestions:
-            st.caption("Continue with")
-            for index, suggestion in enumerate(suggestions[:4]):
-                if st.button(suggestion, key=f"suggestion_{index}"):
-                    suggested_message = suggestion
+            control_left, control_main, control_right = st.columns([1, 4, 1])
+            with control_main:
+                st.caption("Continue with")
+                for index, suggestion in enumerate(suggestions[:4]):
+                    if st.button(suggestion, key=f"suggestion_{index}"):
+                        suggested_message = suggestion
 
     user_message = st.chat_input("Type your customer support question...")
     submitted_message = quick_message or suggested_message or user_message
@@ -536,12 +547,13 @@ if page == "Chatbot":
         except FileNotFoundError:
             st.error("Model files are missing. Please run preprocessing and training first.")
 
-    col1, col2 = st.columns([1, 4])
-    if col1.button("Start New Chat"):
-        st.session_state.pop("chat_history", None)
-        st.session_state.pop("last_prediction", None)
-        st.session_state.pop("last_support_intent", None)
-        st.rerun()
+    control_left, control_main, control_right = st.columns([1, 4, 1])
+    with control_main:
+        if st.button("Start New Chat"):
+            st.session_state.pop("chat_history", None)
+            st.session_state.pop("last_prediction", None)
+            st.session_state.pop("last_support_intent", None)
+            st.rerun()
 
     if "last_prediction" in st.session_state:
         result = st.session_state["last_prediction"]
