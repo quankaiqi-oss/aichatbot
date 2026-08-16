@@ -349,6 +349,12 @@ st.markdown(
             outline: none !important;
         }
 
+        [data-testid="stChatInput"] {
+            max-width: 1080px !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+
         [data-testid="stChatInput"] textarea:focus {
             border: none !important;
             box-shadow: none !important;
@@ -362,7 +368,10 @@ st.markdown(
             min-height: 66px !important;
             padding: 0.35rem 0.45rem !important;
             box-shadow: 0 8px 20px rgba(92, 68, 68, 0.045) !important;
+            width: 100% !important;
             max-width: 1080px !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
         }
 
         [data-testid="stChatInput"] > div:focus-within {
