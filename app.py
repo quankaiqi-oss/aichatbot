@@ -38,22 +38,22 @@ st.markdown(
     """
     <style>
         :root {
-            --primary: #4f7fa8;
-            --primary-dark: #24577f;
-            --accent: #6aa8a5;
-            --ink: #172033;
-            --muted: #667085;
+            --primary: #4b8f7a;
+            --primary-dark: #2f6f5d;
+            --accent: #7bb7a8;
+            --ink: #1f2933;
+            --muted: #6b7280;
             --panel: #ffffff;
-            --soft: #f6f9fc;
-            --line: #dbe5ef;
-            --charcoal: #172033;
-            --paper: #f8fbff;
+            --soft: #f7faf8;
+            --line: #dde7e1;
+            --charcoal: #1f2933;
+            --paper: #fafcfb;
         }
 
         .stApp {
             background:
-                linear-gradient(90deg, rgba(79, 127, 168, 0.035) 1px, transparent 1px),
-                linear-gradient(180deg, #f8fbff 0%, #ffffff 420px, #ffffff 100%);
+                linear-gradient(90deg, rgba(75, 143, 122, 0.028) 1px, transparent 1px),
+                linear-gradient(180deg, #fbfdfc 0%, #ffffff 420px, #ffffff 100%);
             background-size: 32px 32px, auto;
             color: var(--ink);
         }
@@ -67,12 +67,12 @@ st.markdown(
         }
 
         [data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #f5f9fd 0%, #ffffff 100%);
-            border-right: 1px solid #dde8f2;
+            background: linear-gradient(180deg, #f8fbf9 0%, #ffffff 100%);
+            border-right: 1px solid #dde7e1;
         }
 
         [data-testid="stSidebar"] * {
-            color: #172033 !important;
+            color: #1f2933 !important;
         }
 
         [data-testid="stSidebar"] > div:first-child {
@@ -95,13 +95,13 @@ st.markdown(
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
-            background: rgba(232, 243, 252, 0.78) !important;
-            border-left-color: #4f7fa8 !important;
+            background: rgba(231, 246, 239, 0.78) !important;
+            border-left-color: #4b8f7a !important;
             box-shadow: none;
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) * {
-            color: #174a72 !important;
+            color: #2f6f5d !important;
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) div[data-testid="stMarkdownContainer"] p {
@@ -109,8 +109,8 @@ st.markdown(
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
-            background: rgba(232, 243, 252, 0.52) !important;
-            border-left-color: rgba(79, 127, 168, 0.42) !important;
+            background: rgba(231, 246, 239, 0.52) !important;
+            border-left-color: rgba(75, 143, 122, 0.42) !important;
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label > div:first-child {
@@ -125,19 +125,19 @@ st.markdown(
 
         .app-hero {
             background:
-                linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(242, 248, 253, 0.96));
-            border: 1px solid rgba(207, 223, 236, 0.9);
+                linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(246, 251, 248, 0.96));
+            border: 1px solid rgba(218, 231, 224, 0.95);
             border-radius: 8px;
             padding: 1.05rem 1.15rem;
             margin-bottom: 1.1rem;
             box-shadow:
-                0 8px 22px rgba(52, 92, 124, 0.055),
+                0 8px 22px rgba(53, 95, 80, 0.045),
                 inset 0 1px 0 rgba(255, 255, 255, 0.75);
         }
 
         .app-hero h1 {
             margin: 0;
-            color: #12385a;
+            color: #1f2933;
             font-family: "Segoe UI", Arial, sans-serif;
             font-size: 1.72rem;
             font-weight: 800;
@@ -153,7 +153,7 @@ st.markdown(
 
         .eyebrow {
             margin-bottom: 0.34rem !important;
-            color: #4f7fa8 !important;
+            color: #4b8f7a !important;
             font-size: 0.7rem !important;
             font-weight: 700;
             letter-spacing: 0;
@@ -168,11 +168,11 @@ st.markdown(
         }
 
         .status-card {
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid rgba(207, 223, 236, 0.9);
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid rgba(218, 231, 224, 0.95);
             border-radius: 8px;
             padding: 0.8rem 0.9rem;
-            box-shadow: 0 8px 18px rgba(52, 92, 124, 0.045);
+            box-shadow: 0 8px 18px rgba(53, 95, 80, 0.04);
         }
 
         .status-card small {
@@ -183,12 +183,12 @@ st.markdown(
         }
 
         .status-card strong {
-            color: #172033;
+            color: #1f2933;
             font-size: 0.95rem;
         }
 
         h2, h3 {
-            color: #172033;
+            color: #1f2933;
             letter-spacing: 0;
         }
 
@@ -197,14 +197,14 @@ st.markdown(
             border: 1px solid var(--line);
             border-radius: 8px;
             padding: 1rem;
-            box-shadow: 0 9px 20px rgba(52, 92, 124, 0.045);
+            box-shadow: 0 9px 20px rgba(53, 95, 80, 0.04);
         }
 
         .stButton > button {
             border-radius: 6px;
-            border: 1px solid #cfddea;
+            border: 1px solid #d6e4dd;
             background: #ffffff;
-            color: #172033;
+            color: #1f2933;
             font-weight: 600;
             box-shadow: none;
             min-height: 2.35rem;
@@ -212,9 +212,9 @@ st.markdown(
         }
 
         .stButton > button:hover {
-            border-color: #8fb8d8;
-            background: #f0f7fd;
-            color: #12385a;
+            border-color: #9ac7b8;
+            background: #f2fbf7;
+            color: #2f6f5d;
         }
 
         .chat-row {
@@ -238,9 +238,9 @@ st.markdown(
             height: 2rem;
             min-width: 2rem;
             border-radius: 8px;
-            background: #eaf4fc;
-            border: 1px solid #cfe2f2;
-            color: #24577f;
+            background: #e9f7f0;
+            border: 1px solid #cce8dc;
+            color: #2f6f5d;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -255,21 +255,21 @@ st.markdown(
             max-width: min(760px, 72%);
             padding: 0.72rem 0.9rem;
             border-radius: 10px;
-            border: 1px solid #dbe5ef;
+            border: 1px solid #dde7e1;
             line-height: 1.55;
-            box-shadow: 0 6px 16px rgba(52, 92, 124, 0.035);
+            box-shadow: 0 6px 16px rgba(53, 95, 80, 0.032);
             overflow-wrap: anywhere;
             white-space: pre-wrap;
         }
 
         .chat-row.assistant .chat-bubble {
             background: #ffffff;
-            border-color: #dbe5ef;
+            border-color: #dde7e1;
         }
 
         .chat-row.user .chat-bubble {
-            background: #edf6ff;
-            border-color: #cfe2f2;
+            background: #edf8f3;
+            border-color: #cce8dc;
             max-width: min(620px, 58%);
         }
 
@@ -327,18 +327,18 @@ st.markdown(
 
         .stSelectbox div[data-baseweb="select"] > div {
             border-radius: 7px;
-            border-color: #cfddea;
+            border-color: #d6e4dd;
             background-color: #ffffff;
         }
 
         .stSelectbox div[data-baseweb="select"] * {
-            color: #172033;
+            color: #1f2933;
         }
 
         [data-testid="stChatInput"] textarea {
             background-color: #ffffff !important;
             border: none !important;
-            color: #172033 !important;
+            color: #1f2933 !important;
             min-height: 52px !important;
             padding: 0.9rem 1rem !important;
             font-size: 0.98rem !important;
@@ -354,22 +354,22 @@ st.markdown(
 
         [data-testid="stChatInput"] > div {
             background: #ffffff !important;
-            border: 1px solid #cfddea !important;
+            border: 1px solid #d6e4dd !important;
             border-radius: 10px !important;
             min-height: 66px !important;
             padding: 0.35rem 0.45rem !important;
-            box-shadow: 0 8px 20px rgba(52, 92, 124, 0.06) !important;
+            box-shadow: 0 8px 20px rgba(53, 95, 80, 0.045) !important;
         }
 
         [data-testid="stChatInput"] > div:focus-within {
-            border-color: #8fb8d8 !important;
-            box-shadow: 0 10px 24px rgba(52, 92, 124, 0.1) !important;
+            border-color: #9ac7b8 !important;
+            box-shadow: 0 10px 24px rgba(53, 95, 80, 0.08) !important;
         }
 
         [data-testid="stChatInput"] button {
-            background-color: #eaf4fc !important;
-            color: #24577f !important;
-            border: 1px solid #cfe2f2 !important;
+            background-color: #e9f7f0 !important;
+            color: #2f6f5d !important;
+            border: 1px solid #cce8dc !important;
             border-radius: 8px !important;
             min-width: 44px !important;
             min-height: 44px !important;
