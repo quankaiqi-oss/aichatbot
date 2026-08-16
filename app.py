@@ -38,23 +38,23 @@ st.markdown(
     """
     <style>
         :root {
-            --primary: #7f8f83;
-            --primary-dark: #4f5f58;
-            --accent: #9b8366;
-            --ink: #24211d;
-            --muted: #746f66;
-            --panel: #fffdf8;
-            --soft: #f6f3ed;
-            --line: #ded8ca;
-            --charcoal: #2b2925;
-            --paper: #fbf7ef;
+            --primary: #4f7fa8;
+            --primary-dark: #24577f;
+            --accent: #6aa8a5;
+            --ink: #172033;
+            --muted: #667085;
+            --panel: #ffffff;
+            --soft: #f6f9fc;
+            --line: #dbe5ef;
+            --charcoal: #172033;
+            --paper: #f8fbff;
         }
 
         .stApp {
             background:
-                linear-gradient(90deg, rgba(43, 41, 37, 0.018) 1px, transparent 1px),
-                linear-gradient(180deg, #f7f3eb 0%, #fbfaf6 340px, #ffffff 820px);
-            background-size: 28px 28px, auto;
+                linear-gradient(90deg, rgba(79, 127, 168, 0.035) 1px, transparent 1px),
+                linear-gradient(180deg, #f8fbff 0%, #ffffff 420px, #ffffff 100%);
+            background-size: 32px 32px, auto;
             color: var(--ink);
         }
 
@@ -67,12 +67,12 @@ st.markdown(
         }
 
         [data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #ebe4d7 0%, #f7f3eb 100%);
-            border-right: 1px solid #d8d0c0;
+            background: linear-gradient(180deg, #f5f9fd 0%, #ffffff 100%);
+            border-right: 1px solid #dde8f2;
         }
 
         [data-testid="stSidebar"] * {
-            color: #2d2924 !important;
+            color: #172033 !important;
         }
 
         [data-testid="stSidebar"] > div:first-child {
@@ -95,13 +95,13 @@ st.markdown(
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
-            background: rgba(255, 253, 248, 0.58) !important;
-            border-left-color: #4f5f58 !important;
+            background: rgba(232, 243, 252, 0.78) !important;
+            border-left-color: #4f7fa8 !important;
             box-shadow: none;
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) * {
-            color: #2b3e37 !important;
+            color: #174a72 !important;
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) div[data-testid="stMarkdownContainer"] p {
@@ -109,8 +109,8 @@ st.markdown(
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
-            background: rgba(255, 253, 248, 0.42) !important;
-            border-left-color: rgba(79, 95, 88, 0.34) !important;
+            background: rgba(232, 243, 252, 0.52) !important;
+            border-left-color: rgba(79, 127, 168, 0.42) !important;
         }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label > div:first-child {
@@ -125,19 +125,19 @@ st.markdown(
 
         .app-hero {
             background:
-                linear-gradient(135deg, rgba(255, 253, 248, 0.96), rgba(242, 238, 228, 0.9));
-            border: 1px solid rgba(184, 174, 157, 0.55);
+                linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(242, 248, 253, 0.96));
+            border: 1px solid rgba(207, 223, 236, 0.9);
             border-radius: 8px;
             padding: 1.05rem 1.15rem;
             margin-bottom: 1.1rem;
             box-shadow:
-                0 6px 16px rgba(43, 41, 37, 0.045),
+                0 8px 22px rgba(52, 92, 124, 0.055),
                 inset 0 1px 0 rgba(255, 255, 255, 0.75);
         }
 
         .app-hero h1 {
             margin: 0;
-            color: #10233f;
+            color: #12385a;
             font-family: "Segoe UI", Arial, sans-serif;
             font-size: 1.72rem;
             font-weight: 800;
@@ -153,7 +153,7 @@ st.markdown(
 
         .eyebrow {
             margin-bottom: 0.34rem !important;
-            color: #87633a !important;
+            color: #4f7fa8 !important;
             font-size: 0.7rem !important;
             font-weight: 700;
             letter-spacing: 0;
@@ -168,11 +168,11 @@ st.markdown(
         }
 
         .status-card {
-            background: rgba(255, 253, 248, 0.88);
-            border: 1px solid rgba(184, 174, 157, 0.48);
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(207, 223, 236, 0.9);
             border-radius: 8px;
             padding: 0.8rem 0.9rem;
-            box-shadow: 0 8px 18px rgba(43, 41, 37, 0.045);
+            box-shadow: 0 8px 18px rgba(52, 92, 124, 0.045);
         }
 
         .status-card small {
@@ -183,28 +183,28 @@ st.markdown(
         }
 
         .status-card strong {
-            color: #2d2924;
+            color: #172033;
             font-size: 0.95rem;
         }
 
         h2, h3 {
-            color: #2d2924;
+            color: #172033;
             letter-spacing: 0;
         }
 
         [data-testid="stMetric"] {
-            background: rgba(255, 253, 248, 0.9);
+            background: rgba(255, 255, 255, 0.94);
             border: 1px solid var(--line);
             border-radius: 8px;
             padding: 1rem;
-            box-shadow: 0 9px 20px rgba(43, 41, 37, 0.05);
+            box-shadow: 0 9px 20px rgba(52, 92, 124, 0.045);
         }
 
         .stButton > button {
             border-radius: 6px;
-            border: 1px solid #cfc6b8;
-            background: #f5f1e8;
-            color: #2d2924;
+            border: 1px solid #cfddea;
+            background: #ffffff;
+            color: #172033;
             font-weight: 600;
             box-shadow: none;
             min-height: 2.35rem;
@@ -212,9 +212,9 @@ st.markdown(
         }
 
         .stButton > button:hover {
-            border-color: #9f9484;
-            background: #ebe4d7;
-            color: #2d2924;
+            border-color: #8fb8d8;
+            background: #f0f7fd;
+            color: #12385a;
         }
 
         .chat-row {
@@ -238,9 +238,9 @@ st.markdown(
             height: 2rem;
             min-width: 2rem;
             border-radius: 8px;
-            background: #e6dfd1;
-            border: 1px solid #d2c8b8;
-            color: #4f5f58;
+            background: #eaf4fc;
+            border: 1px solid #cfe2f2;
+            color: #24577f;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -255,20 +255,21 @@ st.markdown(
             max-width: min(760px, 72%);
             padding: 0.72rem 0.9rem;
             border-radius: 10px;
-            border: 1px solid #ded8ca;
+            border: 1px solid #dbe5ef;
             line-height: 1.55;
-            box-shadow: 0 5px 14px rgba(43, 41, 37, 0.035);
+            box-shadow: 0 6px 16px rgba(52, 92, 124, 0.035);
             overflow-wrap: anywhere;
             white-space: pre-wrap;
         }
 
         .chat-row.assistant .chat-bubble {
-            background: #fffdf8;
+            background: #ffffff;
+            border-color: #dbe5ef;
         }
 
         .chat-row.user .chat-bubble {
-            background: #eee8dc;
-            border-color: #d6ccbc;
+            background: #edf6ff;
+            border-color: #cfe2f2;
             max-width: min(620px, 58%);
         }
 
@@ -281,7 +282,7 @@ st.markdown(
         div[data-testid="stExpander"] {
             border: 1px solid var(--line);
             border-radius: 7px;
-            background: rgba(255, 253, 248, 0.72);
+            background: rgba(255, 255, 255, 0.86);
             max-width: 760px;
         }
 
@@ -326,18 +327,18 @@ st.markdown(
 
         .stSelectbox div[data-baseweb="select"] > div {
             border-radius: 7px;
-            border-color: #d6ccbc;
-            background-color: #fbf8f1;
+            border-color: #cfddea;
+            background-color: #ffffff;
         }
 
         .stSelectbox div[data-baseweb="select"] * {
-            color: #2d2924;
+            color: #172033;
         }
 
         [data-testid="stChatInput"] textarea {
-            background-color: #fbf8f1 !important;
+            background-color: #ffffff !important;
             border: none !important;
-            color: #2d2924 !important;
+            color: #172033 !important;
             min-height: 52px !important;
             padding: 0.9rem 1rem !important;
             font-size: 0.98rem !important;
@@ -352,23 +353,23 @@ st.markdown(
         }
 
         [data-testid="stChatInput"] > div {
-            background: #fbf8f1 !important;
-            border: 1px solid #d6ccbc !important;
+            background: #ffffff !important;
+            border: 1px solid #cfddea !important;
             border-radius: 10px !important;
             min-height: 66px !important;
             padding: 0.35rem 0.45rem !important;
-            box-shadow: 0 8px 18px rgba(43, 41, 37, 0.055) !important;
+            box-shadow: 0 8px 20px rgba(52, 92, 124, 0.06) !important;
         }
 
         [data-testid="stChatInput"] > div:focus-within {
-            border-color: #a89d8d !important;
-            box-shadow: 0 10px 22px rgba(43, 41, 37, 0.08) !important;
+            border-color: #8fb8d8 !important;
+            box-shadow: 0 10px 24px rgba(52, 92, 124, 0.1) !important;
         }
 
         [data-testid="stChatInput"] button {
-            background-color: #e6dfd1 !important;
-            color: #4f5f58 !important;
-            border: 1px solid #d2c8b8 !important;
+            background-color: #eaf4fc !important;
+            color: #24577f !important;
+            border: 1px solid #cfe2f2 !important;
             border-radius: 8px !important;
             min-width: 44px !important;
             min-height: 44px !important;
