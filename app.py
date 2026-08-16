@@ -224,8 +224,8 @@ st.markdown(
             gap: 0.65rem;
             align-items: flex-start;
             margin: 1.15rem 0;
-            width: min(900px, 100%);
-            margin-left: 7%;
+            width: min(1180px, 100%);
+            margin-left: auto;
             margin-right: auto;
         }
 
@@ -256,7 +256,7 @@ st.markdown(
         .chat-bubble {
             display: inline-block;
             width: fit-content;
-            max-width: min(640px, 74%);
+            max-width: min(680px, 68%);
             padding: 0.95rem 1.08rem;
             border-radius: 10px;
             border: 1px solid #d8d2c3;
@@ -275,12 +275,12 @@ st.markdown(
             background: #b4cfcb;
             border-color: #a4c3be;
             color: #000000;
-            max-width: min(500px, 58%);
+            max-width: min(520px, 48%);
         }
 
         .chat-control-area {
-            width: min(900px, 100%);
-            margin: 0.5rem auto 0 7%;
+            width: min(1180px, 100%);
+            margin: 0.5rem auto 0 auto;
         }
 
         .chat-control-area .stButton > button {
@@ -288,8 +288,8 @@ st.markdown(
         }
 
         .chat-followups {
-            width: min(900px, 100%);
-            margin: 0.2rem auto 0 7%;
+            width: min(1180px, 100%);
+            margin: 0.2rem auto 0 auto;
             padding-left: 2.65rem;
         }
 
@@ -307,8 +307,8 @@ st.markdown(
             border: 1px solid var(--line);
             border-radius: 7px;
             background: rgba(255, 255, 255, 0.88);
-            max-width: 900px;
-            margin-left: 7%;
+            max-width: 1180px;
+            margin-left: auto;
             margin-right: auto;
         }
 
@@ -373,8 +373,8 @@ st.markdown(
         }
 
         [data-testid="stChatInput"] {
-            max-width: 900px !important;
-            margin-left: 7% !important;
+            max-width: 1180px !important;
+            margin-left: auto !important;
             margin-right: auto !important;
         }
 
@@ -392,8 +392,8 @@ st.markdown(
             padding: 0.35rem 0.45rem !important;
             box-shadow: 0 8px 20px rgba(92, 68, 68, 0.045) !important;
             width: 100% !important;
-            max-width: 900px !important;
-            margin-left: 7% !important;
+            max-width: 1180px !important;
+            margin-left: auto !important;
             margin-right: auto !important;
         }
 
