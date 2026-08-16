@@ -88,28 +88,40 @@ def interactive_metric_chart(chart_df: pd.DataFrame, title: str):
 
 def interactive_single_metric_chart(summary_df: pd.DataFrame, title: str):
     sorted_df = summary_df.sort_values("Score", ascending=False)
-    chart = (
+    bars = (
         alt.Chart(sorted_df)
-        .mark_bar(cornerRadiusTopRight=7, cornerRadiusBottomRight=7)
+        .mark_bar(cornerRadiusTopLeft=7, cornerRadiusTopRight=7, size=58)
         .encode(
-            y=alt.Y("Metric:N", title=None, sort=list(sorted_df["Metric"])),
-            x=alt.X("Score:Q", scale=alt.Scale(domain=[0, 1.0]), title="Score"),
-            color=alt.Color("Metric:N", scale=alt.Scale(range=CHART_COLORS), legend=None),
+            x=alt.X("Metric:N", title=None, sort=list(sorted_df["Metric"])),
+            y=alt.Y(
+                "Score:Q",
+                scale=alt.Scale(domain=[0, 1.05]),
+                title="Score",
+                axis=alt.Axis(grid=True, gridColor="#EDE7D5", labelColor="#5C4444", titleColor="#5C4444"),
+            ),
+            color=alt.Color(
+                "Metric:N",
+                scale=alt.Scale(range=["#5C4444", "#b4cfcb", "#EDE7D5", "#8f7676"]),
+                legend=None,
+            ),
             tooltip=[alt.Tooltip("Metric:N"), alt.Tooltip("Score:Q", format=".4f")],
         )
-        .properties(height=260, title=title)
-        .interactive()
+        .properties(height=320, title=alt.TitleParams(text=title, color="#5C4444", fontSize=15))
     )
     labels = (
         alt.Chart(sorted_df)
-        .mark_text(align="left", baseline="middle", dx=5, color="#5C4444", fontSize=12)
+        .mark_text(align="center", baseline="bottom", dy=-6, color="#5C4444", fontSize=12)
         .encode(
-            y=alt.Y("Metric:N", title=None, sort=list(sorted_df["Metric"])),
-            x=alt.X("Score:Q", scale=alt.Scale(domain=[0, 1.0])),
+            x=alt.X("Metric:N", title=None, sort=list(sorted_df["Metric"])),
+            y=alt.Y("Score:Q", scale=alt.Scale(domain=[0, 1.05])),
             text=alt.Text("Score:Q", format=".4f"),
         )
     )
-    return chart + labels
+    return (bars + labels).configure_axis(
+        labelColor="#5C4444",
+        titleColor="#5C4444",
+        gridColor="#EDE7D5",
+    ).configure_view(stroke=None)
 
 
 def interactive_speed_chart(speed_df: pd.DataFrame):
