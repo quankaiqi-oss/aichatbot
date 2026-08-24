@@ -1017,12 +1017,11 @@ if page == "Chatbot":
         suggestions = st.session_state["last_prediction"].get("follow_up_options", [])
         if suggestions:
             st.markdown('<div class="chat-followups">', unsafe_allow_html=True)
-            followup_left, followup_right = st.columns([1, 5])
-            with followup_left:
-                st.caption("Follow-up Suggestions")
-                for index, suggestion in enumerate(suggestions[:4]):
-                    if st.button(suggestion, key=f"suggestion_{index}"):
-                        suggested_message = suggestion
+            st.caption("Follow-up Suggestions")
+            followup_columns = st.columns(4)
+            for index, suggestion in enumerate(suggestions[:4]):
+                if followup_columns[index].button(suggestion, key=f"suggestion_{index}", use_container_width=True):
+                    suggested_message = suggestion
             st.markdown("</div>", unsafe_allow_html=True)
 
     user_message = st.chat_input("Type your customer support question...")
