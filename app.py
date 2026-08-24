@@ -532,6 +532,50 @@ def interactive_speed_chart(speed_df: pd.DataFrame):
     )
     return chart
 
+
+def interactive_feedback_rating_chart(feedback_df: pd.DataFrame):
+    rating_df = (
+        feedback_df.dropna(subset=["rating"])
+        .assign(rating=lambda df: df["rating"].astype(int))
+        .groupby("rating", as_index=False)
+        .size()
+        .rename(columns={"size": "Total Feedback"})
+    )
+    all_ratings = pd.DataFrame({"rating": [1, 2, 3, 4, 5]})
+    rating_df = all_ratings.merge(rating_df, on="rating", how="left").fillna({"Total Feedback": 0})
+    chart = (
+        alt.Chart(rating_df)
+        .mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6)
+        .encode(
+            x=alt.X("rating:O", title="Rating", sort=[1, 2, 3, 4, 5]),
+            y=alt.Y("Total Feedback:Q", title="Feedback Count", axis=alt.Axis(grid=True, gridColor="#EDE7D5")),
+            color=alt.Color("rating:O", scale=alt.Scale(range=["#8f7676", "#b79690", "#EDE7D5", "#b4cfcb", "#5C4444"]), legend=None),
+            tooltip=[alt.Tooltip("rating:O", title="Rating"), alt.Tooltip("Total Feedback:Q", format=".0f")],
+        )
+        .properties(height=280, title=alt.TitleParams(text="Rating Distribution", color="#5C4444", fontSize=15))
+    )
+    return chart.configure_axis(labelColor="#5C4444", titleColor="#5C4444").configure_view(stroke=None)
+
+
+def interactive_feedback_intent_chart(intent_summary: pd.DataFrame):
+    chart_df = intent_summary.sort_values("average_rating", ascending=True)
+    chart = (
+        alt.Chart(chart_df)
+        .mark_bar(cornerRadiusTopRight=6, cornerRadiusBottomRight=6, height=24)
+        .encode(
+            y=alt.Y("predicted_intent:N", title=None, sort=list(chart_df["predicted_intent"]), axis=alt.Axis(labelLimit=180)),
+            x=alt.X("average_rating:Q", title="Average Rating", scale=alt.Scale(domain=[0, 5])),
+            color=alt.Color("average_rating:Q", scale=alt.Scale(range=["#8f7676", "#b4cfcb", "#5C4444"]), legend=None),
+            tooltip=[
+                alt.Tooltip("predicted_intent:N", title="Intent"),
+                alt.Tooltip("average_rating:Q", title="Average Rating", format=".2f"),
+                alt.Tooltip("total_feedback:Q", title="Total Feedback", format=".0f"),
+            ],
+        )
+        .properties(height=max(260, min(520, len(chart_df) * 38)), title=alt.TitleParams(text="Average Rating By Intent", color="#5C4444", fontSize=15))
+    )
+    return chart.configure_axis(labelColor="#5C4444", titleColor="#5C4444").configure_view(stroke=None)
+
 st.set_page_config(
     page_title="ShopCare MY",
     layout="wide",
@@ -1583,14 +1627,22 @@ elif page == "Feedback Records":
             col2.metric("Average Rating", f"{average_rating:.2f} / 5")
             col3.metric("Latest Rating", f"{latest_rating:.0f} / 5")
 
-            st.subheader("Saved Feedback")
-            st.dataframe(feedback_df.sort_values("timestamp", ascending=False), use_container_width=True)
-
             intent_summary = (
                 feedback_df.groupby("predicted_intent", as_index=False)
                 .agg(total_feedback=("rating", "count"), average_rating=("rating", "mean"))
                 .sort_values("total_feedback", ascending=False)
             )
+
+            st.subheader("Feedback Charts")
+            chart_left, chart_right = st.columns(2)
+            with chart_left:
+                st.altair_chart(interactive_feedback_rating_chart(feedback_df), use_container_width=True)
+            with chart_right:
+                st.altair_chart(interactive_feedback_intent_chart(intent_summary), use_container_width=True)
+
+            st.subheader("Saved Feedback")
+            st.dataframe(feedback_df.sort_values("timestamp", ascending=False), use_container_width=True)
+
             st.subheader("Feedback By Intent")
             st.dataframe(intent_summary, use_container_width=True)
 
