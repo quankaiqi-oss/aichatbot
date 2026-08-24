@@ -1,6 +1,7 @@
 from pathlib import Path
 from datetime import datetime
 from io import BytesIO
+from zoneinfo import ZoneInfo
 import csv
 import html
 import json
@@ -18,6 +19,7 @@ from shared.src.chatbot import predict_intent
 
 BASE_DIR = Path(__file__).resolve().parent
 FEEDBACK_PATH = BASE_DIR / "feedback.csv"
+MALAYSIA_TIMEZONE = ZoneInfo("Asia/Kuala_Lumpur")
 
 MODEL_RESULT_DIRS = {
     "svm": BASE_DIR / "kaiqi_svm" / "results",
@@ -129,6 +131,10 @@ def format_display_value(value: str) -> str:
     return text
 
 
+def malaysia_now() -> datetime:
+    return datetime.now(MALAYSIA_TIMEZONE)
+
+
 def build_chat_summary(chat_history: list[dict]) -> dict:
     support_exchanges = get_support_exchanges(chat_history)
     if not support_exchanges:
@@ -193,6 +199,7 @@ def format_chat_summary(summary: dict) -> str:
 
 def build_summary_pdf(summary: dict) -> bytes:
     buffer = BytesIO()
+    generated_at = malaysia_now().strftime("%d %b %Y, %I:%M %p MYT")
     with PdfPages(buffer) as pdf:
         fig = plt.figure(figsize=(8.27, 11.69))
         fig.patch.set_facecolor("#F7F3E8")
@@ -208,7 +215,7 @@ def build_summary_pdf(summary: dict) -> bytes:
         fig.text(
             0.11,
             0.855,
-            f"Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            f"Generated on {generated_at}",
             fontsize=9.5,
             color="#FFFFFF",
             alpha=0.86,
@@ -1227,7 +1234,7 @@ if page == "Chatbot":
             )
             st.session_state["chat_summary_pdf"] = build_summary_pdf(summary)
             st.session_state["chat_summary_filename"] = (
-                f"shopcare_chat_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+                f"shopcare_chat_summary_{malaysia_now().strftime('%Y%m%d_%H%M%S')}_MYT.pdf"
             )
             st.session_state["waiting_for_more_help"] = False
             st.session_state["pending_idle_prompt"] = False
