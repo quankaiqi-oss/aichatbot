@@ -37,6 +37,28 @@ MODEL_DISPLAY_NAMES = {
 
 CHART_COLORS = ["#5C4444", "#b4cfcb", "#EDE7D5", "#8f7676"]
 
+QUICK_SUPPORT_TOPICS = {
+    "Track Order": "I want to track my order",
+    "Parcel Late": "My parcel is late and has not arrived",
+    "Request Refund": "I want to request a refund",
+    "Payment Deducted": "My payment was deducted but no order was created",
+    "Damaged Item": "My item arrived damaged",
+    "Wrong Item": "I received the wrong item",
+    "Cancel Order": "I want to cancel my order",
+    "Change Address": "I need to change my shipping address",
+    "Voucher Issue": "My voucher cannot be used",
+    "Cannot Login": "I forgot my password and cannot login",
+    "Seller No Reply": "The seller did not reply to my message",
+    "Complaint": "I want to make a complaint",
+}
+
+QUICK_SUPPORT_EXAMPLES = [
+    "barang belum sampai",
+    "duit kena deduct",
+    "seller tak reply",
+    "nak refund",
+]
+
 
 def load_metrics_table() -> pd.DataFrame:
     rows = []
@@ -726,20 +748,6 @@ if page == "Chatbot":
         ["KaiQi SVM", "Kathy Logistic Regression"],
     )
     model_type = "svm" if model_label == "KaiQi SVM" else "logistic"
-    quick_replies = {
-        "Track Order": "I want to track my order",
-        "Request Refund": "I want to request a refund",
-        "Payment Issue": "I have a payment issue",
-        "Delivery Delay": "My parcel is late and has not arrived",
-        "Damaged Item": "My item arrived damaged",
-        "Wrong Item": "I received the wrong item",
-        "Cancel Order": "I want to cancel my order",
-        "Change Address": "I need to change my shipping address",
-        "Voucher Issue": "My voucher cannot be used",
-        "Account Help": "I forgot my password and cannot login",
-        "Contact Support": "I want to contact customer support",
-        "Complaint": "I want to make a complaint",
-    }
 
     if "chat_history" not in st.session_state:
         st.session_state["chat_history"] = [
@@ -802,9 +810,13 @@ if page == "Chatbot":
     quick_message = None
     show_quick_replies = len(st.session_state["chat_history"]) == 1
     if show_quick_replies:
-        st.caption("Quick topics")
-        quick_reply_rows = [st.columns(4) for _ in range((len(quick_replies) + 3) // 4)]
-        for index, (label, message) in enumerate(quick_replies.items()):
+        st.markdown("#### Quick Support Topics")
+        st.caption(
+            "Click a common online-shopping issue to start the conversation. "
+            f"Local examples supported: {', '.join(QUICK_SUPPORT_EXAMPLES)}."
+        )
+        quick_reply_rows = [st.columns(4) for _ in range((len(QUICK_SUPPORT_TOPICS) + 3) // 4)]
+        for index, (label, message) in enumerate(QUICK_SUPPORT_TOPICS.items()):
             row = quick_reply_rows[index // 4]
             if row[index % 4].button(label, use_container_width=True):
                 quick_message = message
@@ -816,7 +828,7 @@ if page == "Chatbot":
             st.markdown('<div class="chat-followups">', unsafe_allow_html=True)
             followup_left, followup_right = st.columns([1, 5])
             with followup_left:
-                st.caption("Continue with")
+                st.caption("Follow-up Suggestions")
                 for index, suggestion in enumerate(suggestions[:4]):
                     if st.button(suggestion, key=f"suggestion_{index}"):
                         suggested_message = suggestion
