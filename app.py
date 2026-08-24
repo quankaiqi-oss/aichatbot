@@ -111,12 +111,13 @@ def is_closing_reply(message: str) -> bool:
     return cleaned in CHAT_CLOSING_PHRASES or any(keyword in cleaned for keyword in CHAT_CLOSING_KEYWORDS)
 
 
-def get_latest_support_exchange(chat_history: list[dict]) -> dict | None:
-    for message in reversed(chat_history):
+def get_support_exchanges(chat_history: list[dict]) -> list[dict]:
+    exchanges = []
+    for message in chat_history:
         if message.get("role") == "assistant" and message.get("intent") and message.get("user_message"):
             if message["intent"] not in NON_SUPPORT_INTENTS:
-                return message
-    return None
+                exchanges.append(message)
+    return exchanges
 
 
 def format_display_value(value: str) -> str:
@@ -129,38 +130,63 @@ def format_display_value(value: str) -> str:
 
 
 def build_chat_summary(chat_history: list[dict]) -> dict:
-    latest_exchange = get_latest_support_exchange(chat_history)
-    if latest_exchange is None:
+    support_exchanges = get_support_exchanges(chat_history)
+    if not support_exchanges:
         return {
-            "main_issue": "General customer support enquiry",
-            "user_problem": "The user interacted with ShopCare MY.",
-            "suggested_action": "Ask a specific question about order, refund, payment, delivery, account, voucher, or support.",
-            "model": "N/A",
-            "confidence": "N/A",
+            "total_questions": 0,
+            "main_issues": "General customer support enquiry",
+            "latest_issue": "N/A",
+            "conversation_details": [
+                {
+                    "question": "The user interacted with ShopCare MY.",
+                    "issue": "General Enquiry",
+                    "action": "Ask a specific question about order, refund, payment, delivery, account, voucher, or support.",
+                    "model": "N/A",
+                    "confidence": "N/A",
+                }
+            ],
         }
 
-    confidence = latest_exchange.get("confidence")
-    confidence_text = "N/A" if confidence is None else f"{confidence:.4f}"
-    response = latest_exchange.get("content", "")
-    first_action = response.split("\n")[0].strip()
+    conversation_details = []
+    issue_names = []
+    for exchange in support_exchanges:
+        confidence = exchange.get("confidence")
+        confidence_text = "N/A" if confidence is None else f"{confidence:.4f}"
+        response = exchange.get("content", "")
+        first_action = response.split("\n")[0].strip()
+        issue = format_display_value(exchange.get("intent", "N/A"))
+        issue_names.append(issue)
+        conversation_details.append(
+            {
+                "question": exchange.get("user_message", ""),
+                "issue": issue,
+                "action": first_action,
+                "model": exchange.get("model", "N/A").upper(),
+                "confidence": confidence_text,
+            }
+        )
+
+    unique_issues = list(dict.fromkeys(issue_names))
 
     return {
-        "main_issue": format_display_value(latest_exchange.get("intent", "N/A")),
-        "user_problem": latest_exchange.get("user_message", ""),
-        "suggested_action": first_action,
-        "model": latest_exchange.get("model", "N/A").upper(),
-        "confidence": confidence_text,
+        "total_questions": len(conversation_details),
+        "main_issues": ", ".join(unique_issues),
+        "latest_issue": conversation_details[-1]["issue"],
+        "conversation_details": conversation_details,
     }
 
 
 def format_chat_summary(summary: dict) -> str:
+    detail_lines = "\n".join(
+        f"{index}. {detail['question']} -> {detail['issue']}"
+        for index, detail in enumerate(summary["conversation_details"], start=1)
+    )
     return (
         "Here is a short summary of your support chat:\n\n"
-        f"- Main issue: {summary['main_issue']}\n"
-        f"- User problem: {summary['user_problem']}\n"
-        f"- Suggested action: {summary['suggested_action']}\n"
-        f"- Model used: {summary['model']}\n"
-        f"- Confidence: {summary['confidence']}\n\n"
+        f"- Total support questions: {summary['total_questions']}\n"
+        f"- Issues discussed: {summary['main_issues']}\n"
+        f"- Latest issue: {summary['latest_issue']}\n\n"
+        f"{detail_lines}\n\n"
         "You may download this summary as a PDF for reference."
     )
 
@@ -204,17 +230,15 @@ def build_summary_pdf(summary: dict) -> bytes:
         fig.text(
             0.11,
             0.695,
-            "A concise record of the user's latest support issue and the chatbot guidance.",
+            "A concise record of the support issues discussed and the chatbot guidance.",
             fontsize=9.5,
             color="#756464",
         )
 
         fields = [
-            ("Main Issue", summary["main_issue"]),
-            ("User Problem", summary["user_problem"]),
-            ("Suggested Action", summary["suggested_action"]),
-            ("Model Used", summary["model"]),
-            ("Confidence", summary["confidence"]),
+            ("Questions", str(summary["total_questions"])),
+            ("Issues", summary["main_issues"]),
+            ("Latest Issue", summary["latest_issue"]),
         ]
 
         table_x = 0.11
@@ -275,6 +299,49 @@ def build_summary_pdf(summary: dict) -> bytes:
                 text_y -= 0.024
 
             table_y = row_bottom - row_gap
+
+        details_y = table_y - 0.015
+        fig.text(0.11, details_y, "Conversation Details", fontsize=13, weight="bold", color="#5C4444")
+        details_y -= 0.032
+
+        for index, detail in enumerate(summary["conversation_details"], start=1):
+            detail_text = (
+                f"{index}. {detail['question']} | Issue: {detail['issue']} | "
+                f"Action: {detail['action']} | Model: {detail['model']} | Confidence: {detail['confidence']}"
+            )
+            wrapped_lines = textwrap.wrap(detail_text, width=92) or ["N/A"]
+            row_height = 0.026 + len(wrapped_lines) * 0.022
+            row_bottom = details_y - row_height + 0.012
+
+            if row_bottom < 0.12:
+                fig.text(
+                    0.13,
+                    details_y,
+                    f"...and {len(summary['conversation_details']) - index + 1} more item(s).",
+                    fontsize=9.5,
+                    color="#756464",
+                    family="DejaVu Sans",
+                )
+                break
+
+            ax.add_patch(
+                plt.Rectangle(
+                    (0.11, row_bottom),
+                    0.78,
+                    row_height,
+                    facecolor="#FFFFFF" if index % 2 else "#FBF8F0",
+                    edgecolor="#E8E0CF",
+                    linewidth=0.6,
+                    transform=ax.transAxes,
+                )
+            )
+
+            text_y = details_y - 0.018
+            for line in wrapped_lines:
+                fig.text(0.13, text_y, line, fontsize=9.4, color="#2A2424", family="DejaVu Sans")
+                text_y -= 0.022
+
+            details_y = row_bottom - 0.012
 
         fig.text(
             0.11,
