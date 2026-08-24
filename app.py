@@ -119,6 +119,15 @@ def get_latest_support_exchange(chat_history: list[dict]) -> dict | None:
     return None
 
 
+def format_display_value(value: str) -> str:
+    text = str(value).strip()
+    if not text or text == "N/A":
+        return "N/A"
+    if "_" in text and text.lower() == text:
+        return text.replace("_", " ").title()
+    return text
+
+
 def build_chat_summary(chat_history: list[dict]) -> dict:
     latest_exchange = get_latest_support_exchange(chat_history)
     if latest_exchange is None:
@@ -136,7 +145,7 @@ def build_chat_summary(chat_history: list[dict]) -> dict:
     first_action = response.split("\n")[0].strip()
 
     return {
-        "main_issue": latest_exchange.get("intent", "N/A"),
+        "main_issue": format_display_value(latest_exchange.get("intent", "N/A")),
         "user_problem": latest_exchange.get("user_message", ""),
         "suggested_action": first_action,
         "model": latest_exchange.get("model", "N/A").upper(),
@@ -201,36 +210,71 @@ def build_summary_pdf(summary: dict) -> bytes:
         )
 
         fields = [
-            ("Main issue", summary["main_issue"]),
-            ("User problem", summary["user_problem"]),
-            ("Suggested action", summary["suggested_action"]),
-            ("Model used", summary["model"]),
+            ("Main Issue", summary["main_issue"]),
+            ("User Problem", summary["user_problem"]),
+            ("Suggested Action", summary["suggested_action"]),
+            ("Model Used", summary["model"]),
             ("Confidence", summary["confidence"]),
         ]
 
-        y_position = 0.64
-        for label, value in fields:
-            wrapped_lines = textwrap.wrap(str(value), width=78) or ["N/A"]
-            field_height = 0.048 + (len(wrapped_lines) * 0.023)
+        table_x = 0.11
+        table_y = 0.655
+        table_width = 0.78
+        label_width = 0.2
+        row_gap = 0.018
+
+        for index, (label, value) in enumerate(fields):
+            wrapped_lines = textwrap.wrap(format_display_value(value), width=58) or ["N/A"]
+            row_height = max(0.07, 0.04 + len(wrapped_lines) * 0.024)
+            row_top = table_y
+            row_bottom = row_top - row_height
 
             ax.add_patch(
                 plt.Rectangle(
-                    (0.11, y_position - field_height + 0.01),
-                    0.78,
-                    field_height,
-                    facecolor="#FBF8F0",
+                    (table_x, row_bottom),
+                    table_width,
+                    row_height,
+                    facecolor="#FBF8F0" if index % 2 == 0 else "#FFFFFF",
                     edgecolor="#E8E0CF",
-                    linewidth=0.8,
+                    linewidth=0.7,
+                    transform=ax.transAxes,
+                )
+            )
+            ax.add_patch(
+                plt.Rectangle(
+                    (table_x, row_bottom),
+                    label_width,
+                    row_height,
+                    facecolor="#EFE8D8",
+                    edgecolor="#E8E0CF",
+                    linewidth=0.7,
                     transform=ax.transAxes,
                 )
             )
 
-            fig.text(0.13, y_position, label.upper(), fontsize=8.5, weight="bold", color="#756464")
-            text_y = y_position - 0.028
+            fig.text(
+                table_x + 0.022,
+                row_top - 0.043,
+                label,
+                fontsize=9.4,
+                weight="bold",
+                color="#5C4444",
+                family="DejaVu Sans",
+            )
+
+            text_y = row_top - 0.036
             for line in wrapped_lines:
-                fig.text(0.13, text_y, line, fontsize=10.8, color="#2A2424")
-                text_y -= 0.023
-            y_position -= field_height + 0.018
+                fig.text(
+                    table_x + label_width + 0.026,
+                    text_y,
+                    line,
+                    fontsize=10.7,
+                    color="#2A2424",
+                    family="DejaVu Sans",
+                )
+                text_y -= 0.024
+
+            table_y = row_bottom - row_gap
 
         fig.text(
             0.11,
