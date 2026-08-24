@@ -462,7 +462,7 @@ def interactive_metric_chart(chart_df: pd.DataFrame, title: str):
         )
         .properties(height=320, title=alt.TitleParams(text=title, color="#5C4444", fontSize=15))
     )
-    return bars.configure_axis(
+    return bars.interactive().configure_axis(
         labelColor="#5C4444",
         titleColor="#5C4444",
         gridColor="#EDE7D5",
@@ -500,7 +500,7 @@ def interactive_single_metric_chart(summary_df: pd.DataFrame, title: str):
             text=alt.Text("Score:Q", format=".4f"),
         )
     )
-    return (bars + labels).configure_axis(
+    return (bars + labels).interactive().configure_axis(
         labelColor="#5C4444",
         titleColor="#5C4444",
         gridColor="#EDE7D5",
@@ -527,6 +527,7 @@ def interactive_speed_chart(speed_df: pd.DataFrame):
             ],
         )
         .properties(height=230, title=alt.TitleParams(text="Prediction Speed", color="#5C4444", fontSize=15))
+        .interactive()
         .configure_axis(labelColor="#5C4444", titleColor="#5C4444")
         .configure_view(stroke=None)
     )
@@ -554,7 +555,7 @@ def interactive_feedback_rating_chart(feedback_df: pd.DataFrame):
         )
         .properties(height=280, title=alt.TitleParams(text="Rating Distribution", color="#5C4444", fontSize=15))
     )
-    return chart.configure_axis(labelColor="#5C4444", titleColor="#5C4444").configure_view(stroke=None)
+    return chart.interactive().configure_axis(labelColor="#5C4444", titleColor="#5C4444").configure_view(stroke=None)
 
 
 def interactive_feedback_intent_chart(intent_summary: pd.DataFrame):
@@ -574,7 +575,7 @@ def interactive_feedback_intent_chart(intent_summary: pd.DataFrame):
         )
         .properties(height=max(260, min(520, len(chart_df) * 38)), title=alt.TitleParams(text="Average Rating By Intent", color="#5C4444", fontSize=15))
     )
-    return chart.configure_axis(labelColor="#5C4444", titleColor="#5C4444").configure_view(stroke=None)
+    return chart.interactive().configure_axis(labelColor="#5C4444", titleColor="#5C4444").configure_view(stroke=None)
 
 st.set_page_config(
     page_title="ShopCare MY",
@@ -1488,7 +1489,7 @@ elif page == "Model Evaluation":
 
         with st.container(border=True):
             st.subheader("Performance Overview")
-            st.caption("Hover over a bar to inspect the exact score.")
+            st.caption("Hover for details. Scroll to zoom and drag to pan the chart.")
             st.altair_chart(
                 interactive_single_metric_chart(summary_df, f"{selected_label} Metrics"),
                 use_container_width=True,
@@ -1558,7 +1559,7 @@ elif page == "Model Comparison":
         with chart_tab:
             with st.container(border=True):
                 st.subheader("Classification Comparison")
-                st.caption("Hover over a bar to inspect the exact score.")
+                st.caption("Hover for details. Scroll to zoom and drag to pan the chart.")
                 metric_chart_df = comparison_df[["Model", "Accuracy", "Precision", "Recall", "F1 Score"]]
                 st.altair_chart(
                     interactive_metric_chart(metric_chart_df, "Classification Metrics"),
@@ -1600,7 +1601,7 @@ elif page == "Model Comparison":
                     "Avg Prediction Time (ms)": st.column_config.NumberColumn(format="%.6f"),
                 },
             )
-            st.caption("Hover over a bar to inspect the exact timing.")
+            st.caption("Hover for details. Scroll to zoom and drag to pan the chart.")
             st.altair_chart(interactive_speed_chart(comparison_df), use_container_width=True)
     else:
         st.info("Comparison results are not generated yet.")
@@ -1634,6 +1635,7 @@ elif page == "Feedback Records":
             )
 
             st.subheader("Feedback Charts")
+            st.caption("Hover for details. Scroll to zoom and drag to pan the charts.")
             chart_left, chart_right = st.columns(2)
             with chart_left:
                 st.altair_chart(interactive_feedback_rating_chart(feedback_df), use_container_width=True)
