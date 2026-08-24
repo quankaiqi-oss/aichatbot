@@ -896,35 +896,6 @@ if page == "Chatbot":
             st.session_state["pending_idle_prompt"] = False
             st.session_state["idle_prompt_sent"] = True
             st.session_state["waiting_for_more_help"] = True
-        else:
-            remaining_ms = max(1000, int((IDLE_PROMPT_SECONDS - elapsed_seconds) * 1000) + 250)
-            components.html(
-                f"""
-                <div id="idle-chat-prompt"></div>
-                <script>
-                    setTimeout(function() {{
-                        const prompt = document.getElementById("idle-chat-prompt");
-                        prompt.innerHTML = `
-                            <div style="
-                                margin: 0.4rem 0 0.8rem 0;
-                                padding: 0.72rem 0.85rem;
-                                border: 1px solid #d8d2c3;
-                                border-radius: 10px;
-                                background: #ffffff;
-                                color: #5C4444;
-                                font-family: Segoe UI, Arial, sans-serif;
-                                font-size: 0.92rem;
-                                line-height: 1.45;
-                            ">
-                                Do you need help with anything else? If not, reply <b>no</b>, <b>no thanks</b>,
-                                <b>done</b>, or <b>bye</b> and I will prepare a short chat summary.
-                            </div>
-                        `;
-                    }}, {remaining_ms});
-                </script>
-                """,
-                height=95,
-            )
 
     for message in st.session_state["chat_history"]:
         role = message["role"]
@@ -968,6 +939,64 @@ if page == "Chatbot":
                 </div>
                 """
         st.markdown(message_html, unsafe_allow_html=True)
+
+    if st.session_state.get("pending_idle_prompt") and not st.session_state.get("idle_prompt_sent"):
+        elapsed_seconds = datetime.now().timestamp() - st.session_state.get("idle_prompt_started_at", 0)
+        if elapsed_seconds < IDLE_PROMPT_SECONDS:
+            remaining_ms = max(1000, int((IDLE_PROMPT_SECONDS - elapsed_seconds) * 1000) + 250)
+            components.html(
+                f"""
+                <div id="idle-chat-prompt"></div>
+                <script>
+                    setTimeout(function() {{
+                        const prompt = document.getElementById("idle-chat-prompt");
+                        prompt.innerHTML = `
+                            <div style="
+                                display: flex;
+                                gap: 0.65rem;
+                                align-items: flex-start;
+                                width: min(1180px, 100%);
+                                margin: 1.15rem auto;
+                                font-family: Segoe UI, Arial, sans-serif;
+                            ">
+                                <div style="
+                                    width: 2rem;
+                                    height: 2rem;
+                                    min-width: 2rem;
+                                    border-radius: 8px;
+                                    background: #b4cfcb;
+                                    border: 1px solid #a4c3be;
+                                    color: #000000;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-size: 0.9rem;
+                                    font-weight: 700;
+                                    line-height: 1;
+                                ">AI</div>
+                                <div style="
+                                    display: inline-block;
+                                    width: fit-content;
+                                    max-width: min(680px, 68%);
+                                    padding: 0.95rem 1.08rem;
+                                    border-radius: 10px;
+                                    border: 1px solid #d8d2c3;
+                                    background: #ffffff;
+                                    color: #5C4444;
+                                    line-height: 1.58;
+                                    box-shadow: 0 6px 16px rgba(92, 68, 68, 0.032);
+                                    overflow-wrap: anywhere;
+                                ">
+                                    Do you need help with anything else? If not, reply <b>no</b>, <b>no thanks</b>,
+                                    <b>done</b>, or <b>bye</b> and I will prepare a short chat summary.
+                                </div>
+                            </div>
+                        `;
+                    }}, {remaining_ms});
+                </script>
+                """,
+                height=120,
+            )
 
     quick_message = None
     show_quick_replies = len(st.session_state["chat_history"]) == 1
