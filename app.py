@@ -432,6 +432,7 @@ def load_metrics_table() -> pd.DataFrame:
 
 def interactive_metric_chart(chart_df: pd.DataFrame, title: str):
     long_df = chart_df.melt(id_vars="Model", var_name="Metric", value_name="Score")
+    zoom = alt.selection_interval(bind="scales", encodings=["y"])
     bars = (
         alt.Chart(long_df)
         .mark_bar(cornerRadiusTopLeft=5, cornerRadiusTopRight=5)
@@ -462,7 +463,7 @@ def interactive_metric_chart(chart_df: pd.DataFrame, title: str):
         )
         .properties(height=320, title=alt.TitleParams(text=title, color="#5C4444", fontSize=15))
     )
-    return bars.interactive().configure_axis(
+    return bars.add_params(zoom).configure_axis(
         labelColor="#5C4444",
         titleColor="#5C4444",
         gridColor="#EDE7D5",
@@ -471,6 +472,7 @@ def interactive_metric_chart(chart_df: pd.DataFrame, title: str):
 
 def interactive_single_metric_chart(summary_df: pd.DataFrame, title: str):
     sorted_df = summary_df.sort_values("Score", ascending=False)
+    zoom = alt.selection_interval(bind="scales", encodings=["y"])
     bars = (
         alt.Chart(sorted_df)
         .mark_bar(cornerRadiusTopLeft=7, cornerRadiusTopRight=7, size=58)
@@ -500,7 +502,7 @@ def interactive_single_metric_chart(summary_df: pd.DataFrame, title: str):
             text=alt.Text("Score:Q", format=".4f"),
         )
     )
-    return (bars + labels).interactive().configure_axis(
+    return (bars + labels).add_params(zoom).configure_axis(
         labelColor="#5C4444",
         titleColor="#5C4444",
         gridColor="#EDE7D5",
@@ -509,6 +511,7 @@ def interactive_single_metric_chart(summary_df: pd.DataFrame, title: str):
 
 def interactive_speed_chart(speed_df: pd.DataFrame):
     chart_df = speed_df.sort_values("Avg Prediction Time (ms)", ascending=True)
+    zoom = alt.selection_interval(bind="scales", encodings=["x"])
     chart = (
         alt.Chart(chart_df)
         .mark_bar(cornerRadiusTopRight=6, cornerRadiusBottomRight=6, height=28)
@@ -527,7 +530,7 @@ def interactive_speed_chart(speed_df: pd.DataFrame):
             ],
         )
         .properties(height=230, title=alt.TitleParams(text="Prediction Speed", color="#5C4444", fontSize=15))
-        .interactive()
+        .add_params(zoom)
         .configure_axis(labelColor="#5C4444", titleColor="#5C4444")
         .configure_view(stroke=None)
     )
@@ -535,6 +538,7 @@ def interactive_speed_chart(speed_df: pd.DataFrame):
 
 
 def interactive_feedback_rating_chart(feedback_df: pd.DataFrame):
+    zoom = alt.selection_interval(bind="scales", encodings=["y"])
     rating_df = (
         feedback_df.dropna(subset=["rating"])
         .assign(rating=lambda df: df["rating"].astype(int))
@@ -555,11 +559,12 @@ def interactive_feedback_rating_chart(feedback_df: pd.DataFrame):
         )
         .properties(height=280, title=alt.TitleParams(text="Rating Distribution", color="#5C4444", fontSize=15))
     )
-    return chart.interactive().configure_axis(labelColor="#5C4444", titleColor="#5C4444").configure_view(stroke=None)
+    return chart.add_params(zoom).configure_axis(labelColor="#5C4444", titleColor="#5C4444").configure_view(stroke=None)
 
 
 def interactive_feedback_intent_chart(intent_summary: pd.DataFrame):
     chart_df = intent_summary.sort_values("average_rating", ascending=True)
+    zoom = alt.selection_interval(bind="scales", encodings=["x"])
     chart = (
         alt.Chart(chart_df)
         .mark_bar(cornerRadiusTopRight=6, cornerRadiusBottomRight=6, height=24)
@@ -575,7 +580,7 @@ def interactive_feedback_intent_chart(intent_summary: pd.DataFrame):
         )
         .properties(height=max(260, min(520, len(chart_df) * 38)), title=alt.TitleParams(text="Average Rating By Intent", color="#5C4444", fontSize=15))
     )
-    return chart.interactive().configure_axis(labelColor="#5C4444", titleColor="#5C4444").configure_view(stroke=None)
+    return chart.add_params(zoom).configure_axis(labelColor="#5C4444", titleColor="#5C4444").configure_view(stroke=None)
 
 st.set_page_config(
     page_title="ShopCare MY",
