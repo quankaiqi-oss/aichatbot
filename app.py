@@ -900,13 +900,30 @@ if page == "Chatbot":
             remaining_ms = max(1000, int((IDLE_PROMPT_SECONDS - elapsed_seconds) * 1000) + 250)
             components.html(
                 f"""
+                <div id="idle-chat-prompt"></div>
                 <script>
                     setTimeout(function() {{
-                        window.parent.location.reload();
+                        const prompt = document.getElementById("idle-chat-prompt");
+                        prompt.innerHTML = `
+                            <div style="
+                                margin: 0.4rem 0 0.8rem 0;
+                                padding: 0.72rem 0.85rem;
+                                border: 1px solid #d8d2c3;
+                                border-radius: 10px;
+                                background: #ffffff;
+                                color: #5C4444;
+                                font-family: Segoe UI, Arial, sans-serif;
+                                font-size: 0.92rem;
+                                line-height: 1.45;
+                            ">
+                                Do you need help with anything else? If not, reply <b>no</b>, <b>no thanks</b>,
+                                <b>done</b>, or <b>bye</b> and I will prepare a short chat summary.
+                            </div>
+                        `;
                     }}, {remaining_ms});
                 </script>
                 """,
-                height=0,
+                height=95,
             )
 
     for message in st.session_state["chat_history"]:
@@ -987,7 +1004,11 @@ if page == "Chatbot":
             {"role": "user", "content": submitted_message}
         )
 
-        if st.session_state.get("waiting_for_more_help") and is_closing_reply(submitted_message):
+        idle_prompt_due = (
+            st.session_state.get("pending_idle_prompt")
+            and datetime.now().timestamp() - st.session_state.get("idle_prompt_started_at", 0) >= IDLE_PROMPT_SECONDS
+        )
+        if (st.session_state.get("waiting_for_more_help") or idle_prompt_due) and is_closing_reply(submitted_message):
             summary = build_chat_summary(st.session_state["chat_history"])
             st.session_state["chat_history"].append(
                 {
