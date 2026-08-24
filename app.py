@@ -1081,9 +1081,9 @@ if page == "Chatbot":
             st.session_state["last_prediction"] = assistant_message
             if result["intent"] not in NON_SUPPORT_INTENTS:
                 st.session_state["last_support_intent"] = result["intent"]
-                st.session_state["pending_idle_prompt"] = True
-                st.session_state["idle_prompt_sent"] = False
-                st.session_state["idle_prompt_started_at"] = datetime.now().timestamp()
+            st.session_state["pending_idle_prompt"] = True
+            st.session_state["idle_prompt_sent"] = False
+            st.session_state["idle_prompt_started_at"] = datetime.now().timestamp()
             st.rerun()
         except FileNotFoundError:
             st.error("Model files are missing. Please run preprocessing and training first.")
