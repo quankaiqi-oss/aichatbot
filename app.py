@@ -68,6 +68,13 @@ QUICK_SUPPORT_CATEGORIES = {
     },
 }
 
+QUICK_CATEGORY_PROMPTS = {
+    "Order": "You selected Order. Which order issue would you like help with?",
+    "Refund & Return": "You selected Refund & Return. Which refund or return issue would you like help with?",
+    "Payment & Voucher": "You selected Payment & Voucher. Which payment or voucher issue would you like help with?",
+    "Account & Support": "You selected Account & Support. Which account or support issue would you like help with?",
+}
+
 QUICK_SUPPORT_EXAMPLES = [
     "barang belum sampai",
     "duit kena deduct",
@@ -1197,20 +1204,34 @@ if page == "Chatbot":
             )
 
     quick_message = None
+    selected_quick_category = None
     show_quick_replies = len(st.session_state["chat_history"]) == 1
     if show_quick_replies:
-        st.markdown("#### Quick Support Topics")
+        st.markdown("#### Quick Support Categories")
         st.caption(
-            "Click a common online-shopping issue to start the conversation. "
+            "Choose a main category first, then select the specific issue. "
             f"Local examples supported: {', '.join(QUICK_SUPPORT_EXAMPLES)}."
         )
         category_columns = st.columns(len(QUICK_SUPPORT_CATEGORIES))
-        for column, (category, topics) in zip(category_columns, QUICK_SUPPORT_CATEGORIES.items()):
+        for column, category in zip(category_columns, QUICK_SUPPORT_CATEGORIES):
             with column:
-                st.markdown(f"##### {category}")
-                for label, message in topics.items():
-                    if st.button(label, key=f"quick_{category}_{label}", use_container_width=True):
-                        quick_message = message
+                if st.button(category, key=f"quick_category_{category}", use_container_width=True):
+                    selected_quick_category = category
+
+    active_quick_category = st.session_state.get("active_quick_category")
+    if active_quick_category:
+        st.markdown(f"#### {active_quick_category} Options")
+        st.caption("Select the specific issue below.")
+        topics = QUICK_SUPPORT_CATEGORIES[active_quick_category]
+        topic_columns = st.columns(min(4, len(topics)))
+        for index, (label, message) in enumerate(topics.items()):
+            if topic_columns[index % len(topic_columns)].button(
+                label,
+                key=f"quick_topic_{active_quick_category}_{label}",
+                use_container_width=True,
+            ):
+                quick_message = message
+                st.session_state.pop("active_quick_category", None)
 
     suggested_message = None
     if "last_prediction" in st.session_state and not st.session_state.get("waiting_for_more_help"):
@@ -1227,7 +1248,23 @@ if page == "Chatbot":
     user_message = st.chat_input("Type your customer support question...")
     submitted_message = quick_message or suggested_message or user_message
 
+    if selected_quick_category:
+        st.session_state["chat_history"].append({"role": "user", "content": selected_quick_category})
+        st.session_state["chat_history"].append(
+            {
+                "role": "assistant",
+                "content": QUICK_CATEGORY_PROMPTS[selected_quick_category],
+            }
+        )
+        st.session_state["active_quick_category"] = selected_quick_category
+        st.session_state["waiting_for_more_help"] = False
+        st.session_state["pending_idle_prompt"] = False
+        st.session_state["idle_prompt_sent"] = False
+        st.rerun()
+
     if submitted_message:
+        if user_message:
+            st.session_state.pop("active_quick_category", None)
         st.session_state["chat_history"].append(
             {"role": "user", "content": submitted_message}
         )
@@ -1306,6 +1343,7 @@ if page == "Chatbot":
             st.session_state.pop("waiting_for_more_help", None)
             st.session_state.pop("chat_summary_pdf", None)
             st.session_state.pop("chat_summary_filename", None)
+            st.session_state.pop("active_quick_category", None)
             st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
