@@ -1,1 +1,7 @@
 timestamp,user_message,predicted_intent,rating,comment
+2026-08-24T14:10:00,My parcel is late,track_order,5,Demo sample - clear tracking guidance
+2026-08-24T14:12:00,Payment was deducted but no order was created,payment_issue,4,Demo sample - useful payment steps
+2026-08-24T14:15:00,I want to request a refund,get_refund,5,Demo sample - refund steps are clear
+2026-08-24T14:18:00,My voucher cannot be used,voucher_issue,4,Demo sample - explains common voucher conditions
+2026-08-24T14:20:00,I forgot my password and cannot login,recover_password,5,Demo sample - easy to follow
+2026-08-24T14:22:00,The seller did not reply to my message,contact_customer_service,3,Demo sample - could provide more escalation details

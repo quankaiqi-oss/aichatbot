@@ -6,5 +6,8 @@
   "f1_score": 0.9925423841216394,
   "training_time_seconds": 1.1279991001356393,
   "prediction_time_seconds": 0.0027056001126766205,
-  "average_prediction_time_ms": 0.0005043997227212193
+  "average_prediction_time_ms": 0.0005043997227212193,
+  "bleu_1": 0.4188672940672739,
+  "bleu_2": 0.27057832545437416,
+  "rouge_l": 0.3169271686022753
 }

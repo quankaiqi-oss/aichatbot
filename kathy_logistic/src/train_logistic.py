@@ -47,7 +47,17 @@ def main() -> None:
     prediction_seconds = time.perf_counter() - prediction_start
 
     labels = sorted(y_train.unique())
-    metrics = evaluate_and_save("logistic", y_test, predictions, labels, RESULTS_DIR)
+    response_lookup = train_df.groupby("intent")["response"].first().to_dict()
+    predicted_responses = [response_lookup.get(intent, "") for intent in predictions]
+    metrics = evaluate_and_save(
+        "logistic",
+        y_test,
+        predictions,
+        labels,
+        RESULTS_DIR,
+        actual_responses=test_df["response"].fillna("").tolist(),
+        predicted_responses=predicted_responses,
+    )
     metrics["training_time_seconds"] = train_seconds
     metrics["prediction_time_seconds"] = prediction_seconds
     metrics["average_prediction_time_ms"] = (prediction_seconds / len(test_df)) * 1000

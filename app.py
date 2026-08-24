@@ -423,6 +423,9 @@ def load_metrics_table() -> pd.DataFrame:
                     "Precision": metrics["precision"],
                     "Recall": metrics["recall"],
                     "F1 Score": metrics["f1_score"],
+                    "BLEU-1": metrics.get("bleu_1", 0),
+                    "BLEU-2": metrics.get("bleu_2", 0),
+                    "ROUGE-L": metrics.get("rouge_l", 0),
                     "Training Time (s)": metrics.get("training_time_seconds", 0),
                     "Avg Prediction Time (ms)": metrics.get("average_prediction_time_ms", 0),
                 }
@@ -1494,6 +1497,16 @@ elif page == "Model Evaluation":
                 use_container_width=True,
             )
 
+        st.subheader("Response Generation Metrics")
+        response_col1, response_col2, response_col3 = st.columns(3)
+        response_col1.metric("BLEU-1", f"{metrics.get('bleu_1', 0):.4f}", "Unigram overlap")
+        response_col2.metric("BLEU-2", f"{metrics.get('bleu_2', 0):.4f}", "Bigram overlap")
+        response_col3.metric("ROUGE-L", f"{metrics.get('rouge_l', 0):.4f}", "Sequence overlap")
+        st.caption(
+            "These scores compare the retrieved chatbot response with the expected dataset response. "
+            "The chatbot uses ML for intent classification and template/retrieval-based responses."
+        )
+
         table_tab, speed_tab = st.tabs(["Intent Report", "Metric & Speed Tables"])
 
         if report_path.exists():
@@ -1576,6 +1589,9 @@ elif page == "Model Comparison":
                     "Precision": st.column_config.NumberColumn(format="%.4f"),
                     "Recall": st.column_config.NumberColumn(format="%.4f"),
                     "F1 Score": st.column_config.NumberColumn(format="%.4f"),
+                    "BLEU-1": st.column_config.NumberColumn(format="%.4f"),
+                    "BLEU-2": st.column_config.NumberColumn(format="%.4f"),
+                    "ROUGE-L": st.column_config.NumberColumn(format="%.4f"),
                     "Training Time (s)": st.column_config.NumberColumn(format="%.4f"),
                     "Avg Prediction Time (ms)": st.column_config.NumberColumn(format="%.6f"),
                 },
@@ -1660,3 +1676,15 @@ else:
     st.subheader("Methods")
     st.write("SVM module: TF-IDF + Linear SVM")
     st.write("Comparison module: TF-IDF + Logistic Regression")
+    st.subheader("Response Generation")
+    st.write(
+        "The chatbot uses machine learning for intent classification. After an intent is predicted, "
+        "the system returns a predefined or retrieved response for that intent. This means the chatbot "
+        "is an intent-based response retrieval chatbot, not a fully generative chatbot."
+    )
+    st.subheader("Evaluation")
+    st.write(
+        "Intent classification is evaluated using accuracy, precision, recall, and F1 score. "
+        "Response quality is additionally evaluated using BLEU-1, BLEU-2, and ROUGE-L by comparing "
+        "the retrieved chatbot response with the expected dataset response."
+    )
