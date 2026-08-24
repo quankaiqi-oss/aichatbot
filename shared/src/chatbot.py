@@ -124,6 +124,16 @@ FOLLOW_UP_OPTIONS = {
         "Delivery delay",
         "Complaint",
     ],
+    "apply_voucher": [
+        "Voucher cannot be used",
+        "Check payment methods",
+        "Place order",
+    ],
+    "voucher_issue": [
+        "How to apply voucher",
+        "Check payment methods",
+        "Contact support",
+    ],
 }
 
 INTENT_RESPONSES = {
@@ -231,6 +241,14 @@ INTENT_RESPONSES = {
     "place_order": (
         "To place an order, add the item to cart, confirm the shipping address, choose payment "
         "method, apply vouchers if needed, and submit the order."
+    ),
+    "apply_voucher": (
+        "To apply a voucher, please follow these steps:\n"
+        "- Add the item to your cart and go to checkout.\n"
+        "- Look for the Voucher, Promo Code, or Discount Code section.\n"
+        "- Select an available voucher or enter the voucher code.\n"
+        "- Check that the discount is deducted from the total amount before payment.\n"
+        "- If the voucher does not apply, check the expiry date, minimum spend, product eligibility, and payment method."
     ),
     "change_order": (
         "To change an order, open the order details and check whether editing is still allowed. "
@@ -410,7 +428,28 @@ def rule_based_intent(cleaned_text: str, previous_intent: str | None = None) -> 
         return "change_shipping_address"
     if any(word in cleaned_text for word in ["invoice", "receipt", "resit"]):
         return "get_invoice"
-    if any(word in cleaned_text for word in ["voucher", "coupon", "promo code", "discount code"]):
+    has_voucher_word = any(
+        word in cleaned_text
+        for word in ["voucher", "coupon", "promo code", "discount code", "promo", "discount"]
+    )
+    wants_to_apply_voucher = has_voucher_word and any(
+        phrase in cleaned_text
+        for phrase in [
+            "apply",
+            "use",
+            "redeem",
+            "enter",
+            "key in",
+            "how to",
+            "where to",
+            "nak guna",
+            "guna voucher",
+            "pakai voucher",
+        ]
+    )
+    if wants_to_apply_voucher:
+        return "apply_voucher"
+    if has_voucher_word:
         return "voucher_issue"
     if any(word in cleaned_text for word in ["human agent", "real person", "live agent"]):
         return "contact_human_agent"

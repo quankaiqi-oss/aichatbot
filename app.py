@@ -53,6 +53,7 @@ QUICK_SUPPORT_TOPICS = {
     "Wrong Item": "I received the wrong item",
     "Cancel Order": "I want to cancel my order",
     "Change Address": "I need to change my shipping address",
+    "Apply Voucher": "How do I apply a voucher to my order?",
     "Voucher Issue": "My voucher cannot be used",
     "Cannot Login": "I forgot my password and cannot login",
     "Seller No Reply": "The seller did not reply to my message",
@@ -104,6 +105,10 @@ CHAT_CLOSING_KEYWORDS = [
 ]
 
 IDLE_PROMPT_SECONDS = 10
+IDLE_PROMPT_MESSAGE = (
+    "Do you need help with anything else? "
+    "If not, you can reply no, no thanks, done, or bye and I will prepare a short chat summary."
+)
 
 
 def is_closing_reply(message: str) -> bool:
@@ -1075,10 +1080,7 @@ if page == "Chatbot":
             st.session_state["chat_history"].append(
                 {
                     "role": "assistant",
-                    "content": (
-                        "Do you need help with anything else? "
-                        "If not, you can reply no, no thanks, done, or bye and I will prepare a short chat summary."
-                    ),
+                    "content": IDLE_PROMPT_MESSAGE,
                 }
             )
             st.session_state["pending_idle_prompt"] = False
@@ -1240,6 +1242,12 @@ if page == "Chatbot":
             st.session_state["pending_idle_prompt"] = False
             st.session_state["idle_prompt_sent"] = False
             st.rerun()
+        elif st.session_state.get("waiting_for_more_help") or idle_prompt_due:
+            st.session_state["chat_history"] = [
+                message
+                for message in st.session_state["chat_history"]
+                if not (message.get("role") == "assistant" and message.get("content") == IDLE_PROMPT_MESSAGE)
+            ]
 
         try:
             st.session_state["waiting_for_more_help"] = False
