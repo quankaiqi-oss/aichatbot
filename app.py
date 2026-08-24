@@ -44,20 +44,28 @@ MODEL_DISPLAY_NAMES = {
 
 CHART_COLORS = ["#5C4444", "#b4cfcb", "#EDE7D5", "#8f7676"]
 
-QUICK_SUPPORT_TOPICS = {
-    "Track Order": "I want to track my order",
-    "Parcel Late": "My parcel is late and has not arrived",
-    "Request Refund": "I want to request a refund",
-    "Payment Deducted": "My payment was deducted but no order was created",
-    "Damaged Item": "My item arrived damaged",
-    "Wrong Item": "I received the wrong item",
-    "Cancel Order": "I want to cancel my order",
-    "Change Address": "I need to change my shipping address",
-    "Apply Voucher": "How do I apply a voucher to my order?",
-    "Voucher Issue": "My voucher cannot be used",
-    "Cannot Login": "I forgot my password and cannot login",
-    "Seller No Reply": "The seller did not reply to my message",
-    "Complaint": "I want to make a complaint",
+QUICK_SUPPORT_CATEGORIES = {
+    "Order": {
+        "Track Order": "I want to track my order",
+        "Parcel Late": "My parcel is late and has not arrived",
+        "Cancel Order": "I want to cancel my order",
+        "Change Address": "I need to change my shipping address",
+    },
+    "Refund & Return": {
+        "Request Refund": "I want to request a refund",
+        "Damaged Item": "My item arrived damaged",
+        "Wrong Item": "I received the wrong item",
+    },
+    "Payment & Voucher": {
+        "Payment Deducted": "My payment was deducted but no order was created",
+        "Apply Voucher": "How do I apply a voucher to my order?",
+        "Voucher Issue": "My voucher cannot be used",
+    },
+    "Account & Support": {
+        "Cannot Login": "I forgot my password and cannot login",
+        "Seller No Reply": "The seller did not reply to my message",
+        "Complaint": "I want to make a complaint",
+    },
 }
 
 QUICK_SUPPORT_EXAMPLES = [
@@ -1196,11 +1204,13 @@ if page == "Chatbot":
             "Click a common online-shopping issue to start the conversation. "
             f"Local examples supported: {', '.join(QUICK_SUPPORT_EXAMPLES)}."
         )
-        quick_reply_rows = [st.columns(4) for _ in range((len(QUICK_SUPPORT_TOPICS) + 3) // 4)]
-        for index, (label, message) in enumerate(QUICK_SUPPORT_TOPICS.items()):
-            row = quick_reply_rows[index // 4]
-            if row[index % 4].button(label, use_container_width=True):
-                quick_message = message
+        category_columns = st.columns(len(QUICK_SUPPORT_CATEGORIES))
+        for column, (category, topics) in zip(category_columns, QUICK_SUPPORT_CATEGORIES.items()):
+            with column:
+                st.markdown(f"##### {category}")
+                for label, message in topics.items():
+                    if st.button(label, key=f"quick_{category}_{label}", use_container_width=True):
+                        quick_message = message
 
     suggested_message = None
     if "last_prediction" in st.session_state and not st.session_state.get("waiting_for_more_help"):

@@ -432,6 +432,26 @@ def rule_based_intent(cleaned_text: str, previous_intent: str | None = None) -> 
         word in cleaned_text
         for word in ["voucher", "coupon", "promo code", "discount code", "promo", "discount"]
     )
+    has_voucher_problem_word = has_voucher_word and any(
+        phrase in cleaned_text
+        for phrase in [
+            "cannot",
+            "cant",
+            "can't",
+            "can not",
+            "not working",
+            "not valid",
+            "invalid",
+            "expired",
+            "cannot be used",
+            "cannot use",
+            "cant use",
+            "can't use",
+            "tak boleh",
+            "tak dapat",
+            "cannot apply",
+        ]
+    )
     wants_to_apply_voucher = has_voucher_word and any(
         phrase in cleaned_text
         for phrase in [
@@ -447,6 +467,8 @@ def rule_based_intent(cleaned_text: str, previous_intent: str | None = None) -> 
             "pakai voucher",
         ]
     )
+    if has_voucher_problem_word:
+        return "voucher_issue"
     if wants_to_apply_voucher:
         return "apply_voucher"
     if has_voucher_word:
