@@ -7,10 +7,10 @@ import html
 import json
 import textwrap
 
-import altair as alt
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import pandas as pd
+import plotly.express as px
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -43,6 +43,24 @@ MODEL_DISPLAY_NAMES = {
 }
 
 CHART_COLORS = ["#5C4444", "#b4cfcb", "#EDE7D5", "#8f7676"]
+PLOTLY_CHART_CONFIG = {
+    "displayModeBar": True,
+    "scrollZoom": True,
+    "displaylogo": False,
+    "modeBarButtonsToAdd": [
+        "drawline",
+        "drawopenpath",
+        "drawrect",
+        "eraseshape",
+    ],
+    "toImageButtonOptions": {
+        "format": "png",
+        "filename": "shopcare_chart",
+        "height": 720,
+        "width": 1100,
+        "scale": 2,
+    },
+}
 
 QUICK_SUPPORT_CATEGORIES = {
     "Order": {
@@ -435,105 +453,59 @@ def load_metrics_table() -> pd.DataFrame:
 
 def interactive_metric_chart(chart_df: pd.DataFrame, title: str):
     long_df = chart_df.melt(id_vars="Model", var_name="Metric", value_name="Score")
-    bars = (
-        alt.Chart(long_df)
-        .mark_bar(cornerRadiusTopLeft=5, cornerRadiusTopRight=5)
-        .encode(
-            x=alt.X(
-                "Metric:N",
-                title=None,
-                sort=["Accuracy", "Precision", "Recall", "F1 Score"],
-                axis=alt.Axis(labelAngle=0),
-            ),
-            y=alt.Y(
-                "Score:Q",
-                scale=alt.Scale(domain=[0, 1.05]),
-                title="Score",
-                axis=alt.Axis(grid=True, gridColor="#EDE7D5"),
-            ),
-            xOffset=alt.XOffset("Model:N"),
-            color=alt.Color(
-                "Model:N",
-                scale=alt.Scale(range=["#5C4444", "#b4cfcb", "#8f7676"]),
-                legend=alt.Legend(orient="top", title=None),
-            ),
-            tooltip=[
-                alt.Tooltip("Model:N"),
-                alt.Tooltip("Metric:N"),
-                alt.Tooltip("Score:Q", format=".4f"),
-            ],
-        )
-        .properties(height=320, title=alt.TitleParams(text=title, color="#5C4444", fontSize=15))
+    fig = px.bar(
+        long_df,
+        x="Metric",
+        y="Score",
+        color="Model",
+        barmode="group",
+        category_orders={"Metric": ["Accuracy", "Precision", "Recall", "F1 Score"]},
+        color_discrete_sequence=["#5C4444", "#b4cfcb", "#8f7676"],
+        title=title,
+        hover_data={"Score": ":.4f"},
     )
-    return bars.configure_axis(
-        labelColor="#5C4444",
-        titleColor="#5C4444",
-        gridColor="#EDE7D5",
-    ).configure_view(stroke=None)
+    return style_plotly_chart(fig, y_range=[0, 1.05], y_title="Score")
 
 
 def interactive_single_metric_chart(summary_df: pd.DataFrame, title: str):
     sorted_df = summary_df.sort_values("Score", ascending=False)
-    bars = (
-        alt.Chart(sorted_df)
-        .mark_bar(cornerRadiusTopLeft=7, cornerRadiusTopRight=7, size=58)
-        .encode(
-            x=alt.X("Metric:N", title=None, sort=list(sorted_df["Metric"])),
-            y=alt.Y(
-                "Score:Q",
-                scale=alt.Scale(domain=[0, 1.05]),
-                title="Score",
-                axis=alt.Axis(grid=True, gridColor="#EDE7D5", labelColor="#5C4444", titleColor="#5C4444"),
-            ),
-            color=alt.Color(
-                "Metric:N",
-                scale=alt.Scale(range=["#5C4444", "#b4cfcb", "#EDE7D5", "#8f7676"]),
-                legend=None,
-            ),
-            tooltip=[alt.Tooltip("Metric:N"), alt.Tooltip("Score:Q", format=".4f")],
-        )
-        .properties(height=320, title=alt.TitleParams(text=title, color="#5C4444", fontSize=15))
+    fig = px.bar(
+        sorted_df,
+        x="Metric",
+        y="Score",
+        color="Metric",
+        category_orders={"Metric": list(sorted_df["Metric"])},
+        color_discrete_sequence=CHART_COLORS,
+        title=title,
+        text=sorted_df["Score"].map(lambda score: f"{score:.4f}"),
+        hover_data={"Score": ":.4f"},
     )
-    labels = (
-        alt.Chart(sorted_df)
-        .mark_text(align="center", baseline="bottom", dy=-6, color="#5C4444", fontSize=12)
-        .encode(
-            x=alt.X("Metric:N", title=None, sort=list(sorted_df["Metric"])),
-            y=alt.Y("Score:Q", scale=alt.Scale(domain=[0, 1.05])),
-            text=alt.Text("Score:Q", format=".4f"),
-        )
-    )
-    return (bars + labels).configure_axis(
-        labelColor="#5C4444",
-        titleColor="#5C4444",
-        gridColor="#EDE7D5",
-    ).configure_view(stroke=None)
+    fig.update_traces(textposition="outside", cliponaxis=False)
+    return style_plotly_chart(fig, y_range=[0, 1.05], y_title="Score", show_legend=False)
 
 
 def interactive_speed_chart(speed_df: pd.DataFrame):
     chart_df = speed_df.sort_values("Avg Prediction Time (ms)", ascending=True)
-    chart = (
-        alt.Chart(chart_df)
-        .mark_bar(cornerRadiusTopRight=6, cornerRadiusBottomRight=6, height=28)
-        .encode(
-            y=alt.Y("Model:N", sort=list(chart_df["Model"]), title=None, axis=alt.Axis(labelLimit=190)),
-            x=alt.X(
-                "Avg Prediction Time (ms):Q",
-                title="Average Prediction Time (ms)",
-                axis=alt.Axis(grid=True, gridColor="#EDE7D5"),
-            ),
-            color=alt.Color("Model:N", scale=alt.Scale(range=["#5C4444", "#b4cfcb"]), legend=None),
-            tooltip=[
-                alt.Tooltip("Model:N"),
-                alt.Tooltip("Avg Prediction Time (ms):Q", format=".6f"),
-                alt.Tooltip("Training Time (s):Q", format=".4f"),
-            ],
-        )
-        .properties(height=230, title=alt.TitleParams(text="Prediction Speed", color="#5C4444", fontSize=15))
-        .configure_axis(labelColor="#5C4444", titleColor="#5C4444")
-        .configure_view(stroke=None)
+    fig = px.bar(
+        chart_df,
+        y="Model",
+        x="Avg Prediction Time (ms)",
+        color="Model",
+        orientation="h",
+        category_orders={"Model": list(chart_df["Model"])},
+        color_discrete_sequence=["#5C4444", "#b4cfcb"],
+        title="Prediction Speed",
+        hover_data={
+            "Avg Prediction Time (ms)": ":.6f",
+            "Training Time (s)": ":.4f",
+        },
     )
-    return chart
+    return style_plotly_chart(
+        fig,
+        x_title="Average Prediction Time (ms)",
+        height=280,
+        show_legend=False,
+    )
 
 
 def interactive_feedback_rating_chart(feedback_df: pd.DataFrame):
@@ -546,38 +518,79 @@ def interactive_feedback_rating_chart(feedback_df: pd.DataFrame):
     )
     all_ratings = pd.DataFrame({"rating": [1, 2, 3, 4, 5]})
     rating_df = all_ratings.merge(rating_df, on="rating", how="left").fillna({"Total Feedback": 0})
-    chart = (
-        alt.Chart(rating_df)
-        .mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6)
-        .encode(
-            x=alt.X("rating:O", title="Rating", sort=[1, 2, 3, 4, 5]),
-            y=alt.Y("Total Feedback:Q", title="Feedback Count", axis=alt.Axis(grid=True, gridColor="#EDE7D5")),
-            color=alt.Color("rating:O", scale=alt.Scale(range=["#8f7676", "#b79690", "#EDE7D5", "#b4cfcb", "#5C4444"]), legend=None),
-            tooltip=[alt.Tooltip("rating:O", title="Rating"), alt.Tooltip("Total Feedback:Q", format=".0f")],
-        )
-        .properties(height=280, title=alt.TitleParams(text="Rating Distribution", color="#5C4444", fontSize=15))
+    fig = px.bar(
+        rating_df,
+        x="rating",
+        y="Total Feedback",
+        color="rating",
+        category_orders={"rating": [1, 2, 3, 4, 5]},
+        color_discrete_sequence=["#8f7676", "#b79690", "#EDE7D5", "#b4cfcb", "#5C4444"],
+        title="Rating Distribution",
+        hover_data={"Total Feedback": ":.0f"},
     )
-    return chart.configure_axis(labelColor="#5C4444", titleColor="#5C4444").configure_view(stroke=None)
+    return style_plotly_chart(fig, y_title="Feedback Count", height=320, show_legend=False)
 
 
 def interactive_feedback_intent_chart(intent_summary: pd.DataFrame):
     chart_df = intent_summary.sort_values("average_rating", ascending=True)
-    chart = (
-        alt.Chart(chart_df)
-        .mark_bar(cornerRadiusTopRight=6, cornerRadiusBottomRight=6, height=24)
-        .encode(
-            y=alt.Y("predicted_intent:N", title=None, sort=list(chart_df["predicted_intent"]), axis=alt.Axis(labelLimit=180)),
-            x=alt.X("average_rating:Q", title="Average Rating", scale=alt.Scale(domain=[0, 5])),
-            color=alt.Color("average_rating:Q", scale=alt.Scale(range=["#8f7676", "#b4cfcb", "#5C4444"]), legend=None),
-            tooltip=[
-                alt.Tooltip("predicted_intent:N", title="Intent"),
-                alt.Tooltip("average_rating:Q", title="Average Rating", format=".2f"),
-                alt.Tooltip("total_feedback:Q", title="Total Feedback", format=".0f"),
-            ],
-        )
-        .properties(height=max(260, min(520, len(chart_df) * 38)), title=alt.TitleParams(text="Average Rating By Intent", color="#5C4444", fontSize=15))
+    fig = px.bar(
+        chart_df,
+        y="predicted_intent",
+        x="average_rating",
+        color="average_rating",
+        orientation="h",
+        category_orders={"predicted_intent": list(chart_df["predicted_intent"])},
+        color_continuous_scale=["#8f7676", "#b4cfcb", "#5C4444"],
+        title="Average Rating By Intent",
+        hover_data={"average_rating": ":.2f", "total_feedback": ":.0f"},
     )
-    return chart.configure_axis(labelColor="#5C4444", titleColor="#5C4444").configure_view(stroke=None)
+    return style_plotly_chart(
+        fig,
+        x_range=[0, 5],
+        x_title="Average Rating",
+        height=max(300, min(560, len(chart_df) * 42)),
+        show_legend=False,
+    )
+
+
+def style_plotly_chart(
+    fig,
+    *,
+    x_range=None,
+    y_range=None,
+    x_title=None,
+    y_title=None,
+    height=360,
+    show_legend=True,
+):
+    fig.update_layout(
+        height=height,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(255,255,255,0.72)",
+        font={"color": "#5C4444"},
+        title={"font": {"color": "#5C4444", "size": 15}},
+        legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "left", "x": 0},
+        margin={"l": 24, "r": 18, "t": 58, "b": 48},
+        hoverlabel={"bgcolor": "#ffffff", "font": {"color": "#5C4444"}},
+        showlegend=show_legend,
+    )
+    fig.update_xaxes(
+        title_text=x_title,
+        range=x_range,
+        gridcolor="#EDE7D5",
+        linecolor="#d8d2c3",
+        tickfont={"color": "#5C4444"},
+        title_font={"color": "#5C4444"},
+    )
+    fig.update_yaxes(
+        title_text=y_title,
+        range=y_range,
+        gridcolor="#EDE7D5",
+        linecolor="#d8d2c3",
+        tickfont={"color": "#5C4444"},
+        title_font={"color": "#5C4444"},
+    )
+    return fig
 
 st.set_page_config(
     page_title="ShopCare MY",
@@ -1492,9 +1505,10 @@ elif page == "Model Evaluation":
         with st.container(border=True):
             st.subheader("Performance Overview")
             st.caption("Hover over a bar to inspect the exact score.")
-            st.altair_chart(
+            st.plotly_chart(
                 interactive_single_metric_chart(summary_df, f"{selected_label} Metrics"),
                 use_container_width=True,
+                config=PLOTLY_CHART_CONFIG,
             )
 
         st.subheader("Response Generation Metrics")
@@ -1573,9 +1587,10 @@ elif page == "Model Comparison":
                 st.subheader("Classification Comparison")
                 st.caption("Hover over a bar to inspect the exact score.")
                 metric_chart_df = comparison_df[["Model", "Accuracy", "Precision", "Recall", "F1 Score"]]
-                st.altair_chart(
+                st.plotly_chart(
                     interactive_metric_chart(metric_chart_df, "Classification Metrics"),
                     use_container_width=True,
+                    config=PLOTLY_CHART_CONFIG,
                 )
 
         with table_tab:
@@ -1617,7 +1632,11 @@ elif page == "Model Comparison":
                 },
             )
             st.caption("Hover over a bar to inspect the exact timing.")
-            st.altair_chart(interactive_speed_chart(comparison_df), use_container_width=True)
+            st.plotly_chart(
+                interactive_speed_chart(comparison_df),
+                use_container_width=True,
+                config=PLOTLY_CHART_CONFIG,
+            )
     else:
         st.info("Comparison results are not generated yet.")
 
@@ -1653,9 +1672,17 @@ elif page == "Feedback Records":
             st.caption("Hover over a bar to inspect the exact feedback value.")
             chart_left, chart_right = st.columns(2)
             with chart_left:
-                st.altair_chart(interactive_feedback_rating_chart(feedback_df), use_container_width=True)
+                st.plotly_chart(
+                    interactive_feedback_rating_chart(feedback_df),
+                    use_container_width=True,
+                    config=PLOTLY_CHART_CONFIG,
+                )
             with chart_right:
-                st.altair_chart(interactive_feedback_intent_chart(intent_summary), use_container_width=True)
+                st.plotly_chart(
+                    interactive_feedback_intent_chart(intent_summary),
+                    use_container_width=True,
+                    config=PLOTLY_CHART_CONFIG,
+                )
 
             st.subheader("Saved Feedback")
             st.dataframe(feedback_df.sort_values("timestamp", ascending=False), use_container_width=True)

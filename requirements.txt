@@ -4,4 +4,4 @@ scikit-learn
 joblib
 matplotlib
 seaborn
-altair
+plotly
